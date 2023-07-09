@@ -4,11 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase MainPage</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button class="btnForDeleteDoc">DeleteDoc</button>
-
-    <h1>test</h1>
+    <button class="add-user">Add User</button>
+    <div class="wrapper">
+      <table id="crud">
+        <caption>Users</caption>
+        <thead>
+          <tr>
+            <td>Name</td>
+            <td>Phone</td>
+            <td>Email</td>
+            <td>Actions</td>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="popup add">
+      <div class="form-container">
+        <button class="close">x</button>
+        <form>
+          <input type="text" placeholder="name" name="name" required>
+          <input type="tel" placeholder="phone" name="phone" required>
+          <input type="email" placeholder="email" name="email" required>
+          <input type="submit" value="submit" class="submit" required>
+        </form>
+      </div>
+    </div>
+  
+    <!-- <div class="popup update">
+      <form action="">
+        <input type="text" placeholder="name" name="name">
+        <input type="tel" placeholder="phone" name="phone">
+        <input type="email" placeholder="email" name="email">
+        <input type="submit" value="submit">
+      </form>
+    </div> -->
     
 </body>
 
@@ -19,22 +53,22 @@
 <script type="module">
 
 /* start 000 import Firebase */
-const firebaseConfig = {
-    apiKey: "AIzaSyBp8VDM0i3MRj3ubLXGtFEh_OfMdt4b1_Y",
-    authDomain: "firstproject-ee3fe.firebaseapp.com",
-    projectId: "firstproject-ee3fe",
-    storageBucket: "firstproject-ee3fe.appspot.com",
-    messagingSenderId: "427355085094",
-    appId: "1:427355085094:web:82916109a1ae5f5518c9e7"
-};
+// const firebaseConfig = {
+//     apiKey: "AIzaSyBp8VDM0i3MRj3ubLXGtFEh_OfMdt4b1_Y",
+//     authDomain: "firstproject-ee3fe.firebaseapp.com",
+//     projectId: "firstproject-ee3fe",
+//     storageBucket: "firstproject-ee3fe.appspot.com",
+//     messagingSenderId: "427355085094",
+//     appId: "1:427355085094:web:82916109a1ae5f5518c9e7"
+// };
 
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js';
-import { getFirestore, collection, query, where, getDocs,getDoc, setDoc, addDoc, doc,deleteDoc,onSnapshot,orderBy, limit,startAt,endAt } from 'https://www.gstatic.com/firebasejs/9.8.2/firebase-firestore.js';
+// import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js';
+// import { getFirestore, collection, query, where, getDocs,getDoc, setDoc, addDoc, doc,deleteDoc,onSnapshot,orderBy, limit,startAt,endAt } from 'https://www.gstatic.com/firebasejs/9.8.2/firebase-firestore.js';
 
-firebase.initializeApp(firebaseConfig);
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = firebase.storage();
+// firebase.initializeApp(firebaseConfig);
+// const app = initializeApp(firebaseConfig);
+// const db = getFirestore(app);
+// const storage = firebase.storage();
 /* end 000 import Firebase */
 
 
@@ -50,14 +84,7 @@ const storage = firebase.storage();
 
 
 
-/* start 002 getDoc */
-getDoc(doc(db, "collection 1", `13`)).then( e =>{
-  document.querySelector("h1").innerHTML = e.data().name;
-    console.log(e.data());
-    swal.fire(`${e.data().name}`,e.data().text,"success");
 
-});
-/* end 002 getDoc */
 
 
 
@@ -74,29 +101,29 @@ getDoc(doc(db, "collection 1", `13`)).then( e =>{
 
 /* start 004 get all Docs */
 
-let AllDocs;
-async function getAllDocs(collectionName){
+// let AllDocs;
+// async function getAllDocs(collectionName){
   
-  let q = query(collection(db, `${collectionName}`));
-  console.log("Q", q);
-  let querySnapshot = await getDocs(q);
-  let List = querySnapshot.docs.map(doc => doc.data());
-  AllDocs=List;
+//   let q = query(collection(db, `${collectionName}`));
+//   console.log("Q", q);
+//   let querySnapshot = await getDocs(q);
+//   let List = querySnapshot.docs.map(doc => doc.data());
+//   AllDocs = List;
 
-  return AllDocs;
-};
+//   return AllDocs;
+// };
 
-getAllDocs("collection 1").then(e=>{
-    console.log("all", e);
-})
+// getAllDocs("collection 1").then(e=>{
+//     console.log("all", e);
+// })
 
 /* end 004 get all Docs */
 
 
 
-
-
+// console.log(Math.trunc(Math.random() * 10000000000))
 
 
 </script>
+<script src="script.js" type="module"></script>
 </html>
