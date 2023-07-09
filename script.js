@@ -24,7 +24,40 @@ let popup = document.querySelector(".popup");
 let form = document.querySelector("form");
 let tableBody = document.querySelector("table tbody");
 
-let id, username;
+let id;
+
+
+
+addButton.onclick = () => {
+  popup.classList.add("active")
+}
+
+document.querySelector(".popup .close").onclick = function() {
+  this.parentElement.parentElement.classList.remove("active");
+}
+
+
+document.addEventListener("click", (e) => {
+  if(e.target.className == 'delete') {
+    let docObj = doc(db, "collection 1", `${e.target.parentElement.dataset.id}`);
+    deleteDoc(docObj);
+    getResponse();
+    swal.fire(`Deleted Successfully`,``,"success");
+  } else if(e.target.className == 'edit') {
+    getDoc(doc(db, "collection 1", `${e.target.parentElement.dataset.id}`)).then((e)=>{
+      console.log(e.data());
+      form.name.value = e.data().name;
+      form.phone.value = e.data().phone;
+      form.email.value = e.data().email;
+
+      id = e.data().id;
+
+      form.querySelector(".submit").value = 'edit';
+    });
+    popup.classList.add("active")
+  }
+})
+
 
 
 form.onsubmit = (e) => {
@@ -44,7 +77,7 @@ form.onsubmit = (e) => {
 
     popup.classList.remove("active");
     form.querySelector(".submit").value = 'submit'
-    swal.fire(`Updated`,`${username} updated successfully`,"success");
+    swal.fire(`Updated`,``,"success");
 
     form.reset();
 
@@ -60,78 +93,17 @@ form.onsubmit = (e) => {
   
     getResponse();
   
-    swal.fire(`Completed`,`${form.name.value} added successfully`,"success");
+    swal.fire(`Completed`,'',"success");
     
     form.reset();
 
-
   }
 
-  
-}
-
-addButton.onclick = () => {
-  popup.classList.add("active")
-}
-
-document.querySelector(".popup .close").onclick = function() {
-  this.parentElement.parentElement.classList.remove("active");
 }
 
 
-document.addEventListener("click", (e) => {
-  if(e.target.className == 'delete') {
-    let docObj = doc(db, "collection 1", `${e.target.parentElement.dataset.id}`);
-    deleteDoc(docObj);
-    getResponse();
-  } else if(e.target.className == 'edit') {
-    getDoc(doc(db, "collection 1", `${e.target.parentElement.dataset.id}`)).then((e)=>{
-      console.log(e.data());
-      form.name.value = e.data().name;
-      form.phone.value = e.data().phone;
-      form.email.value = e.data().email;
 
-      id = e.data().id;
-      username = e.data().name;
-
-      form.querySelector(".submit").value = 'edit';
-    });
-    popup.classList.add("active")
-  }
-})
-
-
-
-
-
-
-/* start 002 getDoc */
-// getDoc(doc(db, "collection 1", `13`)).then( e =>{
-  // document.querySelector("h1").innerHTML = e.data().name;
-    // console.log(e.data());
-    // swal.fire(`${e.data().name}`,e.data().text,"success");
-// });
-/* end 002 getDoc */
-
-
-
-
-
-
-
-
-/* start 003 deleteDoc */
-// document.querySelector(".btnForDeleteDoc").addEventListener("click",(e)=>{
-//     let orderDoc = doc(db, "collection 1", `34`);
-//     deleteDoc(orderDoc);
-// })
-/* end 003 deleteDoc */
-
-
-
-
-
-/* start 004 get all Docs */
+/* get all Docs */
 
 async function getAllDocs(collectionName){
   
@@ -164,11 +136,5 @@ function getResponse() {
         </tr> 
       ` 
     })
-
 })
 }
-
-/* end 004 get all Docs */
-
-
-
