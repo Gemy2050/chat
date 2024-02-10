@@ -81,11 +81,14 @@ searchInput.oninput = (e) => {
 };
 document.querySelector(".logout").onclick = (e) => {
   localStorage.removeItem("currentUser");
+  sessionStorage.removeItem("chatUsers");
+  loginPage.reset();
+  registerPage.reset();
   activeScreen(loginPage);
 };
 
 // //* Handle Click On user
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("user")) {
     chatID = e.target.dataset.id;
     sessionStorage.setItem("otherUserId", chatID);
@@ -101,23 +104,17 @@ document.addEventListener("click", (e) => {
       activeScreen(chatsPage);
 
       let combinedId = sessionStorage.getItem("combinedId");
-
-      updateDoc(
-        doc(
-          db,
-          "userChats",
-          `${JSON.parse(localStorage.getItem("currentUser")).id}`
-        ),
-        {
-          [combinedId + ".lastMessage.seen"]: true,
-        }
-      );
+      let currentUserId = JSON.parse(localStorage.getItem("currentUser")).id;
 
       sessionStorage.removeItem("otherUserId");
       sessionStorage.removeItem("otherUser");
       sessionStorage.removeItem("combinedId");
+
+      await updateDoc(doc(db, "userChats", `${currentUserId}`), {
+        [combinedId + ".lastMessage.seen"]: true,
+      });
     } catch (error) {
-      console.log(error.message);
+      console.log("Error Message: ", error.message);
     }
   }
 });
@@ -325,7 +322,6 @@ async function chat() {
     );
 
     let chatUser = JSON.parse(sessionStorage.getItem("chatUsers")) || [];
-
     if (chatUser.find((el) => el.userInfo.id == otherUserId)) {
       await updateDoc(doc(db, "userChats", `${currentUserId}`), {
         [combinedId + ".lastMessage.seen"]: true,
@@ -380,7 +376,7 @@ async function login(e) {
   loader.classList.remove("hide");
 
   const email = document.querySelector("#email-login").value;
-  const password = document.querySelector("#password-login").value;
+  const passwordValue = document.querySelector("#password-login").value;
 
   try {
     e.target.classList.add("disabled");
@@ -389,16 +385,18 @@ async function login(e) {
     const querySnapshot = await getDocs(q);
     const data = querySnapshot.docs;
 
-    let user = data[0].data();
-    let { pass, ...userData } = user;
+    let user = data[0]?.data();
 
     if (!user) {
+      loader.classList.add("hide");
       new swal("email is wrong", "", "error");
-      e.target.classList.add("disabled");
+      e.target.classList.remove("disabled");
       return;
     }
 
-    if (password === user.password) {
+    let { password, ...userData } = user;
+
+    if (passwordValue === user.password) {
       localStorage.setItem("currentUser", JSON.stringify(userData));
       handleHomePage();
       activeScreen(chatsPage);
@@ -408,6 +406,7 @@ async function login(e) {
     }
     e.target.classList.remove("disabled");
   } catch (error) {
+    console.log(error);
     new swal("Something went wrong", "", "error");
     e.target.classList.remove("disabled");
   }
@@ -483,6 +482,7 @@ async function register(e) {
     password == "" ||
     !image
   ) {
+    loader.classList.add("hide");
     new swal("Please, fill  all fields!", "", "warning");
     return false;
   }
@@ -546,7 +546,7 @@ async function uploadData(fullName, email, password) {
 
         new swal("Account Created Successfully!", "", "success");
         document.querySelector(".register").classList.remove("disabled");
-        activeScreen(homePage);
+        activeScreen(loginPage);
 
         return downloadURL;
       });
