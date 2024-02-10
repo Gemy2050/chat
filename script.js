@@ -143,6 +143,7 @@ document.querySelector("button.send").onclick = sendMessage;
 
 async function sendMessage() {
   let MessageInput = document.querySelector(".message-input");
+  MessageInput.focus();
   if (["", " "].includes(MessageInput.value.trim())) return;
 
   const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
@@ -262,7 +263,9 @@ async function sendMessage() {
         },
       });
     }
-    console.log("Storing Finished");
+    Array.from(document.querySelectorAll(".messages .message"))
+      .at(-1)
+      .scrollIntoView({ behavior: "smooth" });
   } catch (error) {
     new swal("Server Error", "", "error");
     console.log(error.message);
@@ -327,7 +330,6 @@ async function chat() {
       await updateDoc(doc(db, "userChats", `${currentUserId}`), {
         [combinedId + ".lastMessage.seen"]: true,
       });
-      console.log("Updated");
     }
   } catch (error) {
     console.log(error.message);
@@ -433,12 +435,10 @@ function handleHomePage() {
     sessionStorage.setItem("chatUsers", JSON.stringify(users));
 
     for (let user of users) {
-      console.log("Single user", user);
       let { message, time, seen } = user.lastMessage;
       let { photoURL, name, id } = user.userInfo;
 
       if (!seen && ++count > 1 && !chatsPage.classList.contains("hide")) {
-        console.log("Notification");
         document.querySelector("#notification").play();
       }
 
