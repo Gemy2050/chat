@@ -1,0 +1,45 @@
+{
+  "theme_color": "#FFF",
+  "background_color": "#f1f5f9",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/Test_Hosting/index.html",
+  "name": "ChatApp",
+  "short_name": "Chat",
+  "description": "chat with friends",
+  
+  "icons": [
+      {
+          "src": "./icon.jpg",
+          "sizes": "192x192",
+          "type": "image/png"
+      },
+      {
+          "src": "./icon.jpg",
+          "sizes": "256x256",
+          "type": "image/png"
+      },
+      {
+          "src": "./icon.jpg",
+          "sizes": "384x384",
+          "type": "image/png"
+      },
+      {
+          "src": "./icon.jpg",
+          "sizes": "512x512",
+          "type": "image/png"
+      }
+  ],
+  "shortcuts": [
+    {
+      "name": "Club",
+      "url": "https://gemy2050.github.io/club/",
+      "icon": "https://gemy2050.github.io/club/logo.jpg"
+    },
+    {
+      "name": "Social",
+      "url": "https://gemy2050.github.io/social_app/",
+      "icon": "https://gemy2050.github.io/social_app/x.jpg"
+    }
+  ]
+}

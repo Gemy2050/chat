@@ -7,10 +7,11 @@
   <title>Chat App</title>
   <link rel="stylesheet" href="./cdn/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
     integrity='sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=='
     crossorigin='anonymous' />
-  <link rel="shortcut icon" href="https://gemy2050.github.io/portfolio/imgs/icon.jpg" type="image/x-icon">
+  <link rel="shortcut icon" href="./icon.jpg" type="image/x-icon">
 </head>
 
 <body>
@@ -67,7 +68,7 @@
         </div>
 
         <div class="col-12 text-center mt-5">
-          <button type="submit" class="login btn btn-primary w-50">Login</button>
+          <button type="submit" class="login btn btn-primary w-50" aria-label="login">Login</button>
           <p class="mt-2 text-muted route">Create new account? <span class="link-primary">Register</span></p>
         </div>
       </form>
@@ -77,14 +78,14 @@
       <div class="head bg-dark sticky-top p-3 user-select-none">
         <div class="user-info d-flex align-items-center gap-2">
           <img src="" alt="avatar" loading="lazy">
-          <h5 class="username text-white"></h5>
+          <h5 class="username m-0 text-white"></h5>
         </div>
-        <button class="btn btn-sm btn-danger logout ">Logout</button>
+        <button class="btn btn-sm btn-danger logout" aria-label="logout">Logout</button>
       </div>
       <div class="search px-2 mt-1 mb-2 d-flex gap-1 w-100">
         <input type="search" class="form-control" name="search" id="searchUser" autocomplete="off"
           placeholder="Search user" />
-        <button class="btn btn-sm btn-primary">search</button>
+        <button class="btn btn-sm btn-primary" aria-label="search">search</button>
       </div>
       <div class="search-result d-none pt-1 pb-3 px-3 border-bottom ">
         <!-- <p class="search-message text-muted">Search Result</p>
@@ -107,16 +108,17 @@
       <div class="head bg-dark sticky-top p-3 user-select-none">
         <div class="user-info d-flex align-items-center gap-2">
           <img src="" alt="avatar" loading="lazy">
-          <h5 class="username text-white"></h5>
+          <h5 class="username text-white m-0"></h5>
         </div>
-        <button class="btn btn-sm btn-danger back"><i class="fa-solid fa-arrow-right-long"></i></button>
+        <button class="btn btn-sm btn-danger back" aria-label="back"><i
+            class="fa-solid fa-arrow-right-long"></i></button>
       </div>
       <div class="messages">
       </div>
       <div class="input-group px-2 pb-1">
         <!-- <input type="text" class="message-input form-control" placeholder="type a message" autofocus> -->
         <textarea class="form-control message-input" placeholder="type a message" autofocus></textarea>
-        <button class="send btn btn-primary">send</button>
+        <button class="send btn btn-primary" aria-label="send">send</button>
       </div>
     </div>
   </div>

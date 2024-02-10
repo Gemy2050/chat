@@ -45,6 +45,7 @@ let userChatPage = document.querySelector(".user-chat");
 let searchInput = document.getElementById("searchUser");
 
 let chatID = "";
+let chatIsOpen = false;
 
 activeScreen(registerPage);
 
@@ -54,6 +55,7 @@ if (localStorage.getItem("currentUser")) {
 }
 
 if (sessionStorage.getItem("otherUserId")) {
+  chatIsOpen = true;
   chat();
   activeScreen(userChatPage);
 
@@ -92,11 +94,31 @@ document.addEventListener("click", (e) => {
       .querySelector(".search-result")
       .style.setProperty("display", "none", "important");
     searchInput.value = "";
+    chatIsOpen = true;
     chat();
   } else if (e.target.classList.contains("back")) {
-    activeScreen(chatsPage);
-    sessionStorage.removeItem("otherUserId");
-    sessionStorage.removeItem("otherUser");
+    try {
+      activeScreen(chatsPage);
+
+      let combinedId = sessionStorage.getItem("combinedId");
+
+      updateDoc(
+        doc(
+          db,
+          "userChats",
+          `${JSON.parse(localStorage.getItem("currentUser")).id}`
+        ),
+        {
+          [combinedId + ".lastMessage.seen"]: true,
+        }
+      );
+
+      sessionStorage.removeItem("otherUserId");
+      sessionStorage.removeItem("otherUser");
+      sessionStorage.removeItem("combinedId");
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 });
 
@@ -127,7 +149,7 @@ async function sendMessage() {
   const { password, ...currentUser } = currentUserData;
   let otherUser = JSON.parse(sessionStorage.getItem("otherUser"));
 
-  let lastMessage = MessageInput.value;
+  let lastMessageValue = MessageInput.value;
 
   let combinedId =
     currentUser.id > otherUser.id
@@ -149,10 +171,14 @@ async function sendMessage() {
     period;
 
   try {
-    let ChatsDoc = await getDoc(doc(db, "chats", combinedId));
     // Check if there is a chat between the two users
 
-    if (!ChatsDoc.exists()) {
+    //* let ChatsDoc = await getDoc(doc(db, "chats", combinedId));
+    let chatUsers = JSON.parse(sessionStorage.getItem("chatUsers")) || [];
+    let user = chatUsers.find((el) => el.userInfo.id == otherUser.id);
+
+    //* if(!ChatsDoc.exists())
+    if (!user) {
       // Create new chat and add it to both users' chats collection
       await setDoc(doc(db, "chats", combinedId), {
         messages: [
@@ -177,6 +203,7 @@ async function sendMessage() {
       });
     }
     MessageInput.value = "";
+    MessageInput.focus();
     document.querySelector("#sendSound").play();
 
     let userChatDoc = await getDoc(doc(db, "userChats", `${currentUser.id}`));
@@ -189,9 +216,10 @@ async function sendMessage() {
         [combinedId]: {
           userInfo: { ...otherUser },
           lastMessage: {
-            message: lastMessage,
+            message: lastMessageValue,
             time: time,
             id: dateNow.getTime(),
+            seen: true,
           },
         },
       });
@@ -200,9 +228,10 @@ async function sendMessage() {
         [combinedId]: {
           userInfo: { ...otherUser },
           lastMessage: {
-            message: lastMessage,
+            message: lastMessageValue,
             time: time,
             id: dateNow.getTime(),
+            seen: true,
           },
         },
       });
@@ -213,9 +242,10 @@ async function sendMessage() {
         [combinedId]: {
           userInfo: { ...currentUser },
           lastMessage: {
-            message: lastMessage,
+            message: lastMessageValue,
             time: time,
             id: dateNow.getTime(),
+            seen: false,
           },
         },
       });
@@ -224,9 +254,10 @@ async function sendMessage() {
         [combinedId]: {
           userInfo: { ...currentUser },
           lastMessage: {
-            message: lastMessage,
+            message: lastMessageValue,
             time: time,
             id: dateNow.getTime(),
+            seen: false,
           },
         },
       });
@@ -249,26 +280,29 @@ async function chat() {
     let userData = await userDoc.data();
     let { password, ...otherUser } = userData;
 
-    sessionStorage.setItem("otherUser", JSON.stringify(otherUser));
-
     let combinedId =
       currentUserId > userData.id
         ? currentUserId + otherUserId
         : otherUserId + currentUserId;
+
+    sessionStorage.setItem("otherUser", JSON.stringify(otherUser));
+    sessionStorage.setItem("combinedId", combinedId);
 
     document.querySelector(
       ".user-chat .head .username"
     ).innerHTML = `${userData.name}`;
     document.querySelector(".user-chat .head img").src = userData.photoURL;
 
-    const unsubscribe = onSnapshot(doc(db, "chats", combinedId), (doc) => {
-      if (!doc.exists()) {
-        return;
-      }
+    const unsubscribe = onSnapshot(
+      doc(db, "chats", combinedId),
+      async (docData) => {
+        if (!docData.exists()) {
+          return;
+        }
 
-      messagesContainer.innerHTML = "";
-      doc.data().messages.forEach((message) => {
-        messagesContainer.innerHTML += `
+        messagesContainer.innerHTML = "";
+        docData.data().messages.forEach((message) => {
+          messagesContainer.innerHTML += `
           <div class="message ${
             message.senderId == currentUserId ? "outgoing" : "incoming"
           }">
@@ -279,12 +313,22 @@ async function chat() {
             <p class="m-0 content">${message.message}</p>
         </div>
         `;
-      });
+        });
 
-      Array.from(document.querySelectorAll(".messages .message"))
-        .at(-1)
-        .scrollIntoView({ behavior: "smooth" });
-    });
+        Array.from(document.querySelectorAll(".messages .message"))
+          .at(-1)
+          .scrollIntoView({ behavior: "smooth" });
+      }
+    );
+
+    let chatUser = JSON.parse(sessionStorage.getItem("chatUsers")) || [];
+
+    if (chatUser.find((el) => el.userInfo.id == otherUserId)) {
+      await updateDoc(doc(db, "userChats", `${currentUserId}`), {
+        [combinedId + ".lastMessage.seen"]: true,
+      });
+      console.log("Updated");
+    }
   } catch (error) {
     console.log(error.message);
     new swal("Server Error", "", "error");
@@ -344,7 +388,7 @@ async function login(e) {
     const data = querySnapshot.docs;
 
     let user = data[0].data();
-    let { password, ...userData } = user;
+    let { pass, ...userData } = user;
 
     if (!user) {
       new swal("email is wrong", "", "error");
@@ -376,29 +420,39 @@ function handleHomePage() {
 
   let count = 0;
   const unsubscribe = onSnapshot(doc(db, "userChats", `${user.id}`), (doc) => {
+    usersContainer.innerHTML = "";
+
     if (!doc.exists()) {
       return;
     }
 
-    if (!chatsPage.classList.contains("hide") && ++count > 1) {
-      document.querySelector("#notification").play();
-    }
+    let usersDoc = doc.data();
+    let users = Object.values(usersDoc);
 
-    usersContainer.innerHTML = "";
-    let users = doc.data();
-    for (let user in users) {
-      let { message, time } = users[user].lastMessage;
-      let { photoURL, name, id } = users[user].userInfo;
+    users.sort((a, b) => b.lastMessage.id - a.lastMessage.id);
+    sessionStorage.setItem("chatUsers", JSON.stringify(users));
+
+    for (let user of users) {
+      console.log("Single user", user);
+      let { message, time, seen } = user.lastMessage;
+      let { photoURL, name, id } = user.userInfo;
+
+      if (!seen && ++count > 1 && !chatsPage.classList.contains("hide")) {
+        console.log("Notification");
+        document.querySelector("#notification").play();
+      }
 
       usersContainer.innerHTML += `
-        <div class="user d-flex align-items-center gap-2 border-bottom" data-id="${id}">
+        <div class="user  ${
+          !seen ? "not-seen" : ""
+        } d-flex align-items-center gap-2 border-bottom" data-id="${id}">
           <img src="${photoURL}" alt="avatar" loading="lazy">
           <div class="info flex-grow-1">
             <div class="top w-100 d-flex gap-2 justify-content-between">
               <h6 class="name m-0 text-capitalize">${name}</h6>
               <span class="time text-muted">${time}</span>
             </div>
-            <p class="message m-0 text-muted">
+            <p class="message m-0 ${!seen ? "text-primary" : "text-muted"}">
               <bdi>${
                 message.length > 40 ? message.slice(0, 40) + "..." : message
               }</bdi>
