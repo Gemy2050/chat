@@ -1,151 +1,185 @@
-*
-{
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
-body
-{
-    font-family: System-ui;
+
+body {
+  font-family: System-ui;
 }
+
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background-color: #EEE;
 }
+
 ::-webkit-scrollbar-thumb {
-  background-color: #009688;
+  background-color: #0075ff;
   border-radius: 6px;
 }
 
-.wrapper
-{
-    background-color: #fff;
-    overflow-x: auto;
-}
-#crud 
-{
-    min-width: 1000px;
-    text-align: center;
-    margin: 15px auto;
-}
-#crud caption
-{
-    background-color: #009688;
-    color: #fff;
-    padding: 10px 0;
-    font-size: 1.5rem;
-}
-#crud thead
-{
-    background-color:aliceblue;
-   
-}
-#crud thead td
-{
-    padding: 10px;
-    color: #009688;
-}
-#crud tbody td
-{
-    padding: 10px;
-    border-bottom: 1px solid #009688;
-    color: #666565;
-}
-#crud tbody td button,.add-user
-{
-    padding: 5px 7px;
-    border:none;
-    background: transparent;
-    font-family: cursive;
-    font-size: .9rem;
-    color: #fff;
-    border-radius: 3px;
-    cursor: pointer;
-}
-#crud tbody td button.edit
-{
-    background-color:#009688;
-}
-#crud tbody td button.delete
-{
-    background-color:#e91e63;
-}
-.add-user
-{
-    background-color: #009688;
-   margin-top: 20px;
-   padding: 10px 20px;
-   display: block;
-   max-width: 200px;
-   margin: 25px auto;
-}
-.popup
-{
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0,0, 0,.4);
-    display:none ;
-    place-items: center;
-}
-.popup.active
-{
-    display: grid;
-    animation: show .7s ease-in-out;
+.container {
+  position: relative;
+  width: 450px;
+  max-width: 100%;
+  background-color: #f1f5f9;
+  margin: 10px auto;
+  border-radius: 6px;
+  height: calc(100vh - 20px);
+  padding: 0px;
+  /* overflow-y: scroll; */
 }
 
-@keyframes show
-{   0%
-    {
-        transform: translateY(-100%);
-    }
-    100%
-    {
-        transform: translateY(0);
-    }
+.container>div {
+  width: 100%;
 }
-.popup .form-container {
-  position: relative;
+
+.container .hide {
+  display: none !important;
 }
-.popup form
-{
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-    max-width: 350px;
-    width: 100%;
-    padding: 50px 20px;
+
+.container .home {
+  padding: 20px;
 }
-.popup .close {
+
+.container .home label {
+  margin-bottom: 5px;
+}
+
+.container form .eye {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  right: 15px;
+  bottom: 10px;
+  background-color: #FFF;
+  color: #666;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.container form .eye.active {
+  color: black;
+}
+
+.container form .eye:hover {
+  color: black;
+}
+
+.container form .route span {
+  cursor: pointer;
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: .5;
+}
+
+.container .head {
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: capitalize;
+}
+
+.container :is(.chats, .user-chat) input:focus {
+  box-shadow: 0 0 0 !important;
+}
+
+.container :is(.chats, .user-chat) img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid #EEE;
+}
+
+
+.container .chats :is(.users, .search-result) .user {
+  cursor: pointer;
+  padding: 10px;
+  user-select: none;
+  overflow: hidden;
+  transition: .3s;
+}
+
+.container .chats :is(.users, .search-result) .user:hover {
+  background-color: #DDD;
+}
+
+.container .chats :is(.users, .search-result) .user>* {
+  pointer-events: none;
+}
+
+.container .chats .users img {
+  width: 45px;
+  height: 45px;
+}
+
+.container .chats .users .time {
+  min-width: 70px;
+}
+
+.container .chats .users :is(.time, .message) {
+  font-size: 15px;
+}
+
+.container .user-chat i {
+  pointer-events: none;
+}
+
+.container .user-chat .messages {
+  height: calc(100% - 122px);
+  overflow-y: scroll;
+  margin: auto;
+  padding: 10px;
+}
+
+.container .user-chat .messages .message {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  margin: 15px 0;
+  width: 90%;
+}
+
+.container .user-chat .messages .message.outgoing {
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+
+.container .user-chat .messages .message .info {
+  min-width: 50px;
+  text-align: center;
+}
+
+.container .user-chat .messages .content {
+  padding: 8px;
+  border-radius: 6px;
+  background-color: red;
+  color: white;
+}
+
+.container .user-chat .incoming .content {
+  background-color: #666;
+}
+
+.container .user-chat .outgoing .content {
+  background-color: #0075ff;
+}
+
+.container .user-chat .messages .info img {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  border: 1px solid red;
-  color: red;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 4px;
 }
-.popup form input
-{
-    width: 100%;
-    background-color: transparent;
-    border:none;
-    box-shadow: inset 0 0 2px rgba(0,0, 0,.4);
-    margin: 15px 0;
-    padding: 12px 15px;
-    font-size: 1.1rem;
-    font-family: cursive;
-   
+
+.container .user-chat .messages .info .time {
+  font-size: 12px;
 }
-.popup form input[type = "submit"]
-{
-    background-color: #009688;
-    color: #fff;
-    cursor: pointer;
-    max-width: 100px;
+
+.container .user-chat .input-group {
+  position: absolute;
+  bottom: 0;
+  max-width: 100%;
 }

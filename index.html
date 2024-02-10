@@ -1,46 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase MainPage</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase MainPage</title>
+  <link rel="stylesheet" href="./cdn/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+    integrity='sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=='
+    crossorigin='anonymous' />
+  <link rel="shortcut icon" href="https://gemy2050.github.io/portfolio/imgs/icon.jpg" type="image/x-icon">
 </head>
+
 <body>
-    <button class="add-user">Add User</button>
-    <div class="wrapper">
-      <table id="crud">
-        <caption>Users</caption>
-        <thead>
-          <tr>
-            <td>Name</td>
-            <td>Phone</td>
-            <td>Email</td>
-            <td>Actions</td>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+
+  <div class="container d-flex justify-content-center ">
+    <div class="home ">
+      <!-- Register Form -->
+      <form id="registerForm" class="registerForm hide row g-3">
+        <h3 class="text-primary">Welcome to the Chat App!</h3>
+        <p class="text-muted">Please log in or register below:</p><br />
+        <div class="col-6">
+          <label for="firstName class=" form-label">FirstName</label>
+          <input type="text" class="form-control" id="firstName" required>
+        </div>
+        <div class="col-6">
+          <label for="lastName class=" form-label">LastName</label>
+          <input type="text" class="form-control" id="lastName" required>
+        </div>
+        <div class="col-12">
+          <label for="email-register" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email-register" required>
+        </div>
+        <div class="col-md-12 position-relative">
+          <label for="password-register" class="form-label">Password</label>
+          <input type="password" class="form-control pass ps-3 pe-4" maxlength="16" id="password-register" required>
+          <i class="fas fa-eye eye"></i>
+        </div>
+        <div class="col-md-12">
+          <label for="image" class="form-label">Profile Image</label>
+          <input type="file" accept="image/*" class="form-control" id="image" required>
+        </div>
+
+        <div class="col-12 text-center mt-5">
+          <button type="submit" class="register btn btn-primary w-50">Create Account</button>
+          <p class="mt-2 text-muted route">Have an account? <span class="link-primary">Login</span></p>
+        </div>
+      </form>
+      <!-- Login Form -->
+      <form id="loginForm hide" class=" loginForm hide row g-3">
+        <h3 class="text-primary">Welcome to the Chat App!</h3>
+        <p class="text-muted">Please log in or register below:</p><br />
+        <div class="col-12">
+          <label for="email-login" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email-login" required>
+        </div>
+        <div class="col-md-12 position-relative">
+          <label for="password-login" class="form-label">Password</label>
+          <input type="password" class="form-control pass ps-3 pe-4" id="password-login" maxlength="16" required>
+          <i class="fas fa-eye eye"></i>
+        </div>
+
+        <div class="col-12 text-center mt-5">
+          <button type="submit" class="login btn btn-primary w-50">Login</button>
+          <p class="mt-2 text-muted route">Create new account? <span class="link-primary">Register</span></p>
+        </div>
+      </form>
+
     </div>
-    <div class="popup add">
-      <div class="form-container">
-        <button class="close">x</button>
-        <form>
-          <input type="text" placeholder="name" name="name" required>
-          <input type="tel" placeholder="phone" name="phone" required>
-          <input type="email" placeholder="email" name="email" required>
-          <input type="submit" value="submit" class="submit" required>
-        </form>
+    <div class="chats hide overflow-y-scroll">
+      <div class="head bg-dark sticky-top p-3 user-select-none">
+        <div class="user-info d-flex align-items-center gap-2">
+          <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
+          <h4 class="username text-white">Mohamed</h4>
+        </div>
+        <button class="btn btn-danger logout ">Logout</button>
+      </div>
+      <div class="search px-2 mt-1 mb-2 d-flex gap-1 w-100">
+        <input type="search" class="form-control" name="search" id="searchUser" autocomplete="off"
+          placeholder="Search user" />
+        <button class="btn btn-sm btn-primary">search</button>
+      </div>
+      <div class="search-result d-none pt-1 pb-3 px-3 border-bottom ">
+        <!-- <p class="search-message text-muted">Search Result</p>
+        <div class="user d-flex align-items-center gap-2">
+          <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
+          <div class="info flex-grow-1">
+            <div class="top w-100 d-flex gap-2 justify-content-between">
+              <h5 class="name m-0">Mohamed Omar</h5>
+              <span class="time text-muted">7:05 pm</span>
+            </div>
+            <p class="message m-0 text-muted"> This is a Message</p>
+          </div>
+        </div> -->
+      </div>
+
+      <div class="users">
       </div>
     </div>
-  
+    <div class="user-chat hide">
+      <div class="head bg-dark sticky-top p-3 user-select-none">
+        <div class="user-info d-flex align-items-center gap-2">
+          <img src="" alt="avatar">
+          <h4 class="username text-white"></h4>
+        </div>
+        <button class="btn btn-danger back"><i class="fa-solid fa-arrow-right-long"></i></button>
+      </div>
+      <div class="messages">
+      </div>
+      <div class="input-group px-2 pb-1">
+        <input type="text" class="message-input form-control" placeholder="type a message" autofocus>
+        <button class="send btn btn-primary">send</button>
+      </div>
+    </div>
+  </div>
+  <!-- </div> -->
+
+
+  <audio src="./sound/notification.mp3" hidden preload="auto" id="notification"></audio>
+  <audio src="./sound/tones.mp3" hidden preload="auto" id="sendSound"></audio>
 </body>
 
 <script src="./cdn/sweetalert2@11.net_npm_sweetalert2@11"></script>
+<script src="./cdn/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-storage.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-database.js"></script>
+<!-- <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-database.js"></script> -->
 
 <script src="script.js" type="module"></script>
+
 </html>
