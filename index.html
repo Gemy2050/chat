@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase MainPage</title>
+  <title>Chat App</title>
   <link rel="stylesheet" href="./cdn/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
@@ -15,12 +15,16 @@
 
 <body>
 
+  <div class="loader hide">
+    <div class="justify-content-center jimu-primary-loading"></div>
+  </div>
+
   <div class="container d-flex justify-content-center ">
     <div class="home ">
       <!-- Register Form -->
       <form id="registerForm" class="registerForm hide row g-3">
         <h3 class="text-primary">Welcome to the Chat App!</h3>
-        <p class="text-muted">Please log in or register below:</p><br />
+        <p class="text-muted my-1">Please log in or register below:</p>
         <div class="col-6">
           <label for="firstName class=" form-label">FirstName</label>
           <input type="text" class="form-control" id="firstName" required>
@@ -51,7 +55,7 @@
       <!-- Login Form -->
       <form id="loginForm hide" class=" loginForm hide row g-3">
         <h3 class="text-primary">Welcome to the Chat App!</h3>
-        <p class="text-muted">Please log in or register below:</p><br />
+        <p class="text-muted my-1">Please log in or register below:</p>
         <div class="col-12">
           <label for="email-login" class="form-label">Email</label>
           <input type="email" class="form-control" id="email-login" required>
@@ -72,10 +76,10 @@
     <div class="chats hide overflow-y-scroll">
       <div class="head bg-dark sticky-top p-3 user-select-none">
         <div class="user-info d-flex align-items-center gap-2">
-          <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
-          <h4 class="username text-white">Mohamed</h4>
+          <img src="" alt="avatar" loading="lazy">
+          <h5 class="username text-white"></h5>
         </div>
-        <button class="btn btn-danger logout ">Logout</button>
+        <button class="btn btn-sm btn-danger logout ">Logout</button>
       </div>
       <div class="search px-2 mt-1 mb-2 d-flex gap-1 w-100">
         <input type="search" class="form-control" name="search" id="searchUser" autocomplete="off"
@@ -102,20 +106,20 @@
     <div class="user-chat hide">
       <div class="head bg-dark sticky-top p-3 user-select-none">
         <div class="user-info d-flex align-items-center gap-2">
-          <img src="" alt="avatar">
-          <h4 class="username text-white"></h4>
+          <img src="" alt="avatar" loading="lazy">
+          <h5 class="username text-white"></h5>
         </div>
-        <button class="btn btn-danger back"><i class="fa-solid fa-arrow-right-long"></i></button>
+        <button class="btn btn-sm btn-danger back"><i class="fa-solid fa-arrow-right-long"></i></button>
       </div>
       <div class="messages">
       </div>
       <div class="input-group px-2 pb-1">
-        <input type="text" class="message-input form-control" placeholder="type a message" autofocus>
+        <!-- <input type="text" class="message-input form-control" placeholder="type a message" autofocus> -->
+        <textarea class="form-control message-input" placeholder="type a message" autofocus></textarea>
         <button class="send btn btn-primary">send</button>
       </div>
     </div>
   </div>
-  <!-- </div> -->
 
 
   <audio src="./sound/notification.mp3" hidden preload="auto" id="notification"></audio>
@@ -126,7 +130,6 @@
 <script src="./cdn/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-storage.js"></script>
-<!-- <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-database.js"></script> -->
 
 <script src="script.js" type="module"></script>
 

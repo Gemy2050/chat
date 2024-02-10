@@ -1,8 +1,8 @@
+// import {
+//   getStorage,
+//   ref,
+// } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js";
-import {
-  getStorage,
-  ref,
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import {
   getFirestore,
   collection,
@@ -35,6 +35,7 @@ const db = getFirestore(app);
 // * --------------------------------------------------------------
 // * --------------------------------------------------------------
 
+let loader = document.querySelector(".loader");
 let homePage = document.querySelector(".home");
 let loginPage = document.querySelector(".loginForm");
 let registerPage = document.querySelector(".registerForm");
@@ -53,8 +54,8 @@ if (localStorage.getItem("currentUser")) {
 }
 
 if (sessionStorage.getItem("otherUserId")) {
-  activeScreen(userChatPage);
   chat();
+  activeScreen(userChatPage);
 
   let userData = JSON.parse(sessionStorage.getItem("otherUser"));
   document.querySelector(
@@ -103,18 +104,21 @@ document.querySelector("button.register").onclick = register;
 document.querySelector("button.login").onclick = login;
 document.querySelector(".search button").onclick = search;
 
-document.querySelector(".eye").onclick = function () {
-  let input = document.querySelector("input.pass");
-  if (input.getAttribute("type") == "text") {
-    input.type = "password";
-    this.classList.remove("active");
-  } else {
-    input.type = "text";
-    this.classList.add("active");
-  }
-};
+document.querySelectorAll(".eye").forEach((el) => {
+  el.onclick = function () {
+    let input = el.parentElement.parentElement.querySelector("input.pass");
+    if (input.getAttribute("type") == "text") {
+      input.type = "password";
+      this.classList.remove("active");
+    } else {
+      input.type = "text";
+      this.classList.add("active");
+    }
+  };
+});
 
 document.querySelector("button.send").onclick = sendMessage;
+
 async function sendMessage() {
   let MessageInput = document.querySelector(".message-input");
   if (["", " "].includes(MessageInput.value.trim())) return;
@@ -269,7 +273,7 @@ async function chat() {
             message.senderId == currentUserId ? "outgoing" : "incoming"
           }">
             <div class="info">
-              <img src="${message.photoURL}" alt="">
+              <img src="${message.photoURL}" alt="" loading="lazy">
               <span class="time d-block text-muted">${message.time}</span>
             </div>
             <p class="m-0 content">${message.message}</p>
@@ -303,10 +307,10 @@ async function search(e) {
     document.querySelector(".search-result").innerHTML = `
       <p class="search-message text-muted">search result:</p>
         <div class="user d-flex align-items-center gap-2 text-capitalize" data-id='${user.id}'>
-          <img src="${user.photoURL}" alt="avatar">
+          <img src="${user.photoURL}" alt="avatar" loading="lazy">
           <div class="info flex-grow-1">
             <div class="top w-100 d-flex gap-2 justify-content-between">
-              <h5 class="name m-0">${user.name}</h5>
+              <h6 class="name m-0">${user.name}</h6>
             </div>
           </div>
         </div>
@@ -327,6 +331,8 @@ async function search(e) {
 
 async function login(e) {
   e.preventDefault();
+  loader.classList.remove("hide");
+
   const email = document.querySelector("#email-login").value;
   const password = document.querySelector("#password-login").value;
 
@@ -338,6 +344,7 @@ async function login(e) {
     const data = querySnapshot.docs;
 
     let user = data[0].data();
+    let { password, ...userData } = user;
 
     if (!user) {
       new swal("email is wrong", "", "error");
@@ -346,20 +353,19 @@ async function login(e) {
     }
 
     if (password === user.password) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
+      localStorage.setItem("currentUser", JSON.stringify(userData));
       handleHomePage();
       activeScreen(chatsPage);
       homePage.classList.add("hide");
-      e.target.classList.add("disabled");
     } else {
       new swal("password is wrong", "", "error");
-      e.target.classList.add("disabled");
-      return;
     }
+    e.target.classList.remove("disabled");
   } catch (error) {
     new swal("Something went wrong", "", "error");
-    e.target.classList.add("disabled");
+    e.target.classList.remove("disabled");
   }
+  loader.classList.add("hide");
 }
 
 function handleHomePage() {
@@ -368,15 +374,13 @@ function handleHomePage() {
   document.querySelector(".chats .head img").src = user.photoURL;
   document.querySelector(".chats .head .username").textContent = user.name;
 
-  let counter = 0;
+  let count = 0;
   const unsubscribe = onSnapshot(doc(db, "userChats", `${user.id}`), (doc) => {
     if (!doc.exists()) {
       return;
     }
 
-    counter++;
-
-    if (counter > 1) {
+    if (!chatsPage.classList.contains("hide") && ++count > 1) {
       document.querySelector("#notification").play();
     }
 
@@ -388,13 +392,17 @@ function handleHomePage() {
 
       usersContainer.innerHTML += `
         <div class="user d-flex align-items-center gap-2 border-bottom" data-id="${id}">
-          <img src="${photoURL}" alt="avatar">
+          <img src="${photoURL}" alt="avatar" loading="lazy">
           <div class="info flex-grow-1">
             <div class="top w-100 d-flex gap-2 justify-content-between">
-              <h5 class="name m-0 text-capitalize">${name}</h5>
+              <h6 class="name m-0 text-capitalize">${name}</h6>
               <span class="time text-muted">${time}</span>
             </div>
-            <p class="message m-0 text-muted">${message}</p>
+            <p class="message m-0 text-muted">
+              <bdi>${
+                message.length > 40 ? message.slice(0, 40) + "..." : message
+              }</bdi>
+            </p>
           </div>
         </div>
       `;
@@ -404,6 +412,7 @@ function handleHomePage() {
 
 async function register(e) {
   e.preventDefault();
+  loader.classList.remove("hide");
 
   const firstName = document.getElementById("firstName").value.toLowerCase();
   const lastName = document.getElementById("lastName").value.toLowerCase();
@@ -432,8 +441,7 @@ async function register(e) {
     const data = querySnapshot.docs;
 
     if (data[0]) {
-      new swal("User already exists! Please login instead.", "", "warning");
-      activeScreen(loginPage);
+      new swal("User already exists!", "", "warning");
       return;
     }
 
@@ -444,6 +452,8 @@ async function register(e) {
     console.log("Error creating user: ", error.message);
     new swal("Server Error", "", "error");
   }
+  e.target.classList.remove("disabled");
+  loader.classList.add("hide");
 }
 
 async function uploadData(fullName, email, password) {

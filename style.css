@@ -9,7 +9,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 2px;
 }
 
 ::-webkit-scrollbar-track {
@@ -37,7 +37,7 @@ body {
   width: 100%;
 }
 
-.container .hide {
+.hide {
   display: none !important;
 }
 
@@ -63,9 +63,6 @@ body {
   color: black;
 }
 
-.container form .eye:hover {
-  color: black;
-}
 
 .container form .route span {
   cursor: pointer;
@@ -84,7 +81,7 @@ body {
   text-transform: capitalize;
 }
 
-.container :is(.chats, .user-chat) input:focus {
+.container :is(.chats, .user-chat) :is(input, textarea):focus {
   box-shadow: 0 0 0 !important;
 }
 
@@ -121,8 +118,13 @@ body {
   min-width: 70px;
 }
 
-.container .chats .users :is(.time, .message) {
+.container .chats .users .time {
+  font-size: 14px;
+}
+
+.container .chats .users .message {
   font-size: 15px;
+  max-height: 15px;
 }
 
 .container .user-chat i {
@@ -182,4 +184,97 @@ body {
   position: absolute;
   bottom: 0;
   max-width: 100%;
+}
+
+.container .user-chat .input-group textarea.message-input {
+  resize: none;
+  height: 28px;
+}
+
+
+/* ********************* Loader ********************* */
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  background-color: rgb(0, 0, 0);
+  backdrop-filter: blur(15px);
+  border-radius: 6px;
+  z-index: 9999;
+}
+
+
+
+.jimu-primary-loading:before,
+.jimu-primary-loading:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+
+.jimu-primary-loading:before {
+  left: -19.992px;
+}
+
+.jimu-primary-loading:after {
+  left: 19.992px;
+  -webkit-animation-delay: 0.32s !important;
+  animation-delay: 0.32s !important;
+}
+
+.jimu-primary-loading:before,
+.jimu-primary-loading:after,
+.jimu-primary-loading {
+  background: #076fe5;
+  -webkit-animation: loading-keys-app-loading 0.8s infinite ease-in-out;
+  animation: loading-keys-app-loading 0.8s infinite ease-in-out;
+  width: 13.6px;
+  height: 32px;
+}
+
+.jimu-primary-loading {
+  text-indent: -9999em;
+  margin: auto;
+  position: absolute;
+  right: calc(50% - 6.8px);
+  top: calc(50% - 16px);
+  -webkit-animation-delay: 0.16s !important;
+  animation-delay: 0.16s !important;
+}
+
+@-webkit-keyframes loading-keys-app-loading {
+
+  0%,
+  80%,
+  100% {
+    opacity: .75;
+    box-shadow: 0 0 #076fe5;
+    height: 32px;
+  }
+
+  40% {
+    opacity: 1;
+    box-shadow: 0 -8px #076fe5;
+    height: 40px;
+  }
+}
+
+@keyframes loading-keys-app-loading {
+
+  0%,
+  80%,
+  100% {
+    opacity: .75;
+    box-shadow: 0 0 #076fe5;
+    height: 32px;
+  }
+
+  40% {
+    opacity: 1;
+    box-shadow: 0 -8px #076fe5;
+    height: 40px;
+  }
 }
