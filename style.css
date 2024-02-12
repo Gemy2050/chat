@@ -9,7 +9,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 2px;
+  width: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -26,6 +26,8 @@ body {
   width: 450px;
   max-width: 100%;
   background-color: #f1f5f9;
+  background-color: #e1e1e1;
+  background-color: #F2F2F2;
   margin: 10px auto;
   border-radius: 6px;
   height: calc(100vh - 20px);
@@ -102,6 +104,21 @@ body {
   transition: .3s;
 }
 
+.container .chats .user[online="true"] .image {
+  position: relative;
+}
+
+.container .chats .user[online="true"] .image::before {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background-color: green;
+}
+
 .container .chats :is(.users, .search-result) .user:hover {
   background-color: #DDD;
 }
@@ -132,11 +149,11 @@ body {
 }
 
 .container .chats .users .time {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .container .chats .users .message {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .container .user-chat i {

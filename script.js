@@ -1,7 +1,3 @@
-// import {
-//   getStorage,
-//   ref,
-// } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js";
 import {
   getFirestore,
@@ -14,9 +10,7 @@ import {
   updateDoc,
   doc,
   arrayUnion,
-  deleteDoc,
   onSnapshot,
-  orderBy,
 } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -35,6 +29,26 @@ const db = getFirestore(app);
 // * --------------------------------------------------------------
 // * --------------------------------------------------------------
 
+let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+window.onbeforeunload = function (event) {
+  if (currentUser) {
+    updateDoc(doc(db, "users", `${currentUser.id}`), {
+      online: false,
+    }).then((x) => console.log("fullFilled", x));
+  }
+
+  return null;
+};
+
+window.onload = (e) => {
+  if (currentUser) {
+    updateDoc(doc(db, "users", `${currentUser.id}`), {
+      online: true,
+    }).then(() => console.log("Window loaded"));
+  }
+};
+
 let loader = document.querySelector(".loader");
 let homePage = document.querySelector(".home");
 let loginPage = document.querySelector(".loginForm");
@@ -45,25 +59,28 @@ let userChatPage = document.querySelector(".user-chat");
 let searchInput = document.getElementById("searchUser");
 
 let chatID = "";
-let chatIsOpen = false;
+let unsubscribeChat;
+let usersStatusList = [];
+let unsnapUserStatus = () => {},
+  unsnapUserChats = () => {};
 
-activeScreen(registerPage);
+detectUserStatus();
 
-if (localStorage.getItem("currentUser")) {
+if (currentUser) {
   activeScreen(chatsPage);
-  handleHomePage();
+  renderUserChats();
+  // handleHomePage();
 }
 
 if (sessionStorage.getItem("otherUserId")) {
-  chatIsOpen = true;
-  chat();
-  activeScreen(userChatPage);
-
   let userData = JSON.parse(sessionStorage.getItem("otherUser"));
   document.querySelector(
     ".user-chat .head .username"
   ).innerHTML = `${userData.name}`;
   document.querySelector(".user-chat .head img").src = userData.photoURL;
+
+  chat();
+  activeScreen(userChatPage);
 }
 
 document.querySelector(".registerForm .route span").onclick = () => {
@@ -79,7 +96,11 @@ searchInput.oninput = (e) => {
     .querySelector(".search-result")
     .style.setProperty("display", "none", "important");
 };
-document.querySelector(".logout").onclick = (e) => {
+document.querySelector(".logout").onclick = async (e) => {
+  await updateDoc(doc(db, "users", `${currentUser.id}`), {
+    online: false,
+  }).then((x) => console.log("fullFilled", x));
+
   localStorage.removeItem("currentUser");
   sessionStorage.removeItem("chatUsers");
   loginPage.reset();
@@ -97,10 +118,11 @@ document.addEventListener("click", async (e) => {
       .querySelector(".search-result")
       .style.setProperty("display", "none", "important");
     searchInput.value = "";
-    chatIsOpen = true;
+
     chat();
   } else if (e.target.classList.contains("back")) {
     try {
+      unsubscribeChat();
       activeScreen(chatsPage);
 
       let combinedId = sessionStorage.getItem("combinedId");
@@ -157,9 +179,14 @@ async function sendMessage() {
   let dateNow = new Date();
   let hours = new Date().getHours();
   let period = "am";
+
   if (hours > 12) {
     period = "pm";
     hours -= 12;
+  } else if (hours == 12) {
+    period = "pm";
+  } else if (hours == 0) {
+    hours += 12;
   }
 
   let time =
@@ -265,14 +292,12 @@ async function sendMessage() {
       .scrollIntoView({ behavior: "smooth" });
   } catch (error) {
     new swal("Server Error", "", "error");
-    console.log(error.message);
   }
 }
 async function chat() {
   const otherUserId = sessionStorage.getItem("otherUserId");
   const currentUserId = JSON.parse(localStorage.getItem("currentUser")).id + "";
   const messagesContainer = document.querySelector(".messages");
-
   messagesContainer.innerHTML = "";
 
   try {
@@ -293,7 +318,7 @@ async function chat() {
     ).innerHTML = `${userData.name}`;
     document.querySelector(".user-chat .head img").src = userData.photoURL;
 
-    const unsubscribe = onSnapshot(
+    unsubscribeChat = onSnapshot(
       doc(db, "chats", combinedId),
       async (docData) => {
         if (!docData.exists()) {
@@ -301,6 +326,7 @@ async function chat() {
         }
 
         messagesContainer.innerHTML = "";
+
         docData.data().messages.forEach((message) => {
           messagesContainer.innerHTML += `
           <div class="message ${
@@ -329,12 +355,16 @@ async function chat() {
     }
   } catch (error) {
     console.log(error.message);
-    new swal("Server Error", "", "error");
   }
 }
 
 async function search(e) {
-  if (["", " ", null].includes(searchInput.value.trim())) return;
+  if (
+    ["", " ", null, currentUser.name].includes(
+      searchInput.value.trim().toLowerCase()
+    )
+  )
+    return;
 
   e.target.classList.add("disabled");
   try {
@@ -344,12 +374,16 @@ async function search(e) {
     const querySnapshot = await getDocs(q);
     const data = querySnapshot.docs;
 
-    let user = data[0].data();
+    let user = data[0]?.data();
+
+    let { online } = usersStatusList.find((el) => el.id == user.id) || false;
 
     document.querySelector(".search-result").innerHTML = `
       <p class="search-message text-muted">search result:</p>
-        <div class="user d-flex align-items-center gap-2 text-capitalize" data-id='${user.id}'>
-          <img src="${user.photoURL}" alt="avatar" loading="lazy">
+        <div class="user d-flex align-items-center gap-2 text-capitalize" online="${online}" data-id='${user.id}'>
+          <div class="image">
+            <img src="${user.photoURL}" alt="avatar">
+          </div>
           <div class="info flex-grow-1">
             <div class="top w-100 d-flex gap-2 justify-content-between">
               <h6 class="name m-0">${user.name}</h6>
@@ -360,7 +394,7 @@ async function search(e) {
 
     e.target.classList.remove("disabled");
   } catch (error) {
-    // new swal(error.message, "", "error");
+    new swal(error.message, "", "error");
     document.querySelector(
       ".search-result"
     ).innerHTML = `<p class="search-message text-muted">Not Found</p>`;
@@ -375,7 +409,10 @@ async function login(e) {
   e.preventDefault();
   loader.classList.remove("hide");
 
-  const email = document.querySelector("#email-login").value;
+  const email = document
+    .querySelector("#email-login")
+    .value.trim()
+    .toLowerCase();
   const passwordValue = document.querySelector("#password-login").value;
 
   try {
@@ -398,7 +435,13 @@ async function login(e) {
 
     if (passwordValue === user.password) {
       localStorage.setItem("currentUser", JSON.stringify(userData));
-      handleHomePage();
+      if (currentUser) {
+        updateDoc(doc(db, "users", `${currentUser.id}`), {
+          online: true,
+        });
+      }
+
+      renderUserChats();
       activeScreen(chatsPage);
       homePage.classList.add("hide");
     } else {
@@ -414,63 +457,136 @@ async function login(e) {
 }
 
 function handleHomePage() {
-  let usersContainer = document.querySelector(".chats .users");
-  let user = JSON.parse(localStorage.getItem("currentUser"));
-  document.querySelector(".chats .head img").src = user.photoURL;
-  document.querySelector(".chats .head .username").textContent = user.name;
+  try {
+    unsnapUserChats();
+    renderUserChats();
+  } catch (error) {
+    console.log(error);
+    new swal(error.message, "", "error");
+  }
+}
 
-  let count = 0;
-  const unsubscribe = onSnapshot(doc(db, "userChats", `${user.id}`), (doc) => {
+function addUserChatsToPage(users) {
+  if (!users) {
+    return;
+  }
+
+  try {
+    let usersContainer = document.querySelector(".chats .users");
     usersContainer.innerHTML = "";
-
-    if (!doc.exists()) {
-      return;
-    }
-
-    let usersDoc = doc.data();
-    let users = Object.values(usersDoc);
-
-    users.sort((a, b) => b.lastMessage.id - a.lastMessage.id);
-    sessionStorage.setItem("chatUsers", JSON.stringify(users));
-
     for (let user of users) {
-      let { message, time, seen } = user.lastMessage;
-      let { photoURL, name, id } = user.userInfo;
+      let { message, time, seen } = user?.lastMessage;
+      let { photoURL, name, id } = user?.userInfo;
+      let { online } = usersStatusList.find((el) => el.id == id) || false;
 
-      if (!seen && ++count > 1 && !chatsPage.classList.contains("hide")) {
+      if (!seen && !chatsPage.classList.contains("hide")) {
         document.querySelector("#notification").play();
       }
 
       usersContainer.innerHTML += `
-        <div class="user  ${
-          !seen ? "not-seen" : ""
-        } d-flex align-items-center gap-2 border-bottom" data-id="${id}">
-          <img src="${photoURL}" alt="avatar" loading="lazy">
-          <div class="info flex-grow-1">
-            <div class="top w-100 d-flex gap-2 justify-content-between">
-              <h6 class="name m-0 text-capitalize">${name}</h6>
-              <span class="time text-muted">${time}</span>
+            <div class="user  ${
+              !seen ? "not-seen" : ""
+            } d-flex align-items-center gap-2 border-bottom" data-id="${id}" online="${online}">
+              <div class="image">
+                <img src="${photoURL}" alt="avatar" >
+              </div>
+              <div class="info flex-grow-1">
+                <div class="top w-100 d-flex gap-2 justify-content-between">
+                  <h6 class="name m-0 text-capitalize fw-bold">${name}</h6>
+                  <span class="time text-muted">${time}</span>
+                </div>
+                <p class="message m-0 ${!seen ? "text-primary" : "text-muted"}">
+                  <bdi>${
+                    message.length > 40 ? message.slice(0, 40) + "..." : message
+                  }</bdi>
+                </p>
+              </div>
             </div>
-            <p class="message m-0 ${!seen ? "text-primary" : "text-muted"}">
-              <bdi>${
-                message.length > 40 ? message.slice(0, 40) + "..." : message
-              }</bdi>
-            </p>
-          </div>
-        </div>
-      `;
+          `;
     }
-  });
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function renderUserChats() {
+  let usersContainer = document.querySelector(".chats .users");
+  let user = JSON.parse(localStorage.getItem("currentUser"));
+  document.querySelector(".chats .head img").src = user.photoURL;
+  document.querySelector(".chats .head .username").textContent = user.name;
+  try {
+    let count = 0;
+    unsnapUserChats = onSnapshot(doc(db, "userChats", `${user.id}`), (doc) => {
+      usersContainer.innerHTML = "";
+
+      if (!doc.exists()) {
+        return;
+      }
+
+      let usersDoc = doc.data();
+      let users = Object.values(usersDoc);
+
+      users.sort((a, b) => b.lastMessage.id - a.lastMessage.id);
+      sessionStorage.setItem("chatUsers", JSON.stringify(users));
+
+      unsnapUserStatus();
+      detectUserStatus(users);
+    });
+  } catch (error) {
+    new swal(error.message, "", "error");
+  }
+}
+async function detectUserStatus(users) {
+  try {
+    let chatUsers = JSON.parse(sessionStorage.getItem("chatUsers"));
+    if (!chatUsers) {
+      return;
+    }
+
+    let chatUsersId = chatUsers.map((el) => el.userInfo.id);
+
+    const q = query(collection(db, "users"), where("id", "in", chatUsersId));
+    unsnapUserStatus = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          if (usersStatusList.every((el) => el.id !== change.doc.data().id)) {
+            usersStatusList.push(change.doc.data());
+          }
+        }
+        if (change.type === "modified") {
+          usersStatusList = usersStatusList.map((el) => {
+            if (el.id == change.doc.data().id) return change.doc.data();
+            else return el;
+          });
+        }
+        if (change.type === "removed") {
+          console.log("Removed city: ", change.doc.data());
+        }
+
+        addUserChatsToPage(users);
+      });
+    });
+  } catch (error) {
+    new swal(error.message, "", "error");
+  }
 }
 
 async function register(e) {
   e.preventDefault();
   loader.classList.remove("hide");
 
-  const firstName = document.getElementById("firstName").value.toLowerCase();
-  const lastName = document.getElementById("lastName").value.toLowerCase();
-  const email = document.getElementById("email-register").value;
-  const password = document.getElementById("password-register").value;
+  const firstName = document
+    .getElementById("firstName")
+    .value.trim()
+    .toLowerCase();
+  const lastName = document
+    .getElementById("lastName")
+    .value.trim()
+    .toLowerCase();
+  const email = document
+    .getElementById("email-register")
+    .value.trim()
+    .toLowerCase();
+  const password = document.getElementById("password-register").value.trim();
   const image = document.getElementById("image").files[0];
 
   let fullName = `${firstName} ${lastName}`;
@@ -511,47 +627,52 @@ async function register(e) {
 }
 
 async function uploadData(fullName, email, password) {
-  let userID = Date.now();
+  try {
+    let userID = Date.now();
 
-  let file = document.getElementById("image").files[0];
-  var storageRef = firebase.storage().ref();
-  var imageRef = storageRef.child("avatars/" + fullName + userID);
+    let file = document.getElementById("image").files[0];
+    var storageRef = firebase.storage().ref();
+    var imageRef = storageRef.child("avatars/" + fullName + userID);
 
-  // Upload file to Firebase Storage
-  var uploadTask = imageRef.put(file);
+    // Upload file to Firebase Storage
+    var uploadTask = imageRef.put(file);
 
-  // Monitor the upload progress
-  uploadTask.on(
-    "state_changed",
-    function (snapshot) {
-      // You can track the progress here if needed
-    },
-    function (error) {
-      // Handle unsuccessful upload
-      console.error("Error uploading image:", error);
-    },
-    function () {
-      // Handle successful upload
-      // Retrieve the image URL
-      uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
-        let currentUser = {
-          id: userID,
-          name: fullName,
-          photoURL: downloadURL,
-          email: email,
-          password: password,
-        };
+    // Monitor the upload progress
+    uploadTask.on(
+      "state_changed",
+      function (snapshot) {
+        // You can track the progress here if needed
+      },
+      function (error) {
+        // Handle unsuccessful upload
+        console.error("Error uploading image:", error);
+      },
+      function () {
+        // Handle successful upload
+        // Retrieve the image URL
+        uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+          let currentUser = {
+            id: userID,
+            name: fullName,
+            photoURL: downloadURL,
+            email: email,
+            password: password,
+            online: true,
+          };
 
-        setDoc(doc(db, "users", `${userID}`), currentUser);
+          setDoc(doc(db, "users", `${userID}`), currentUser);
 
-        new swal("Account Created Successfully!", "", "success");
-        document.querySelector(".register").classList.remove("disabled");
-        activeScreen(loginPage);
+          new swal("Account Created Successfully!", "", "success");
+          document.querySelector(".register").classList.remove("disabled");
+          activeScreen(loginPage);
 
-        return downloadURL;
-      });
-    }
-  );
+          return downloadURL;
+        });
+      }
+    );
+  } catch (error) {
+    new swal(error.message, "", "error");
+  }
 }
 
 function activeScreen(page) {
