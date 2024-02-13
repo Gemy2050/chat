@@ -52,7 +52,7 @@ window.onload = (e) => {
 };
 
 let notify;
-document.addEventListener("visibilitychange", (e) => {
+document.addEventListener("visibilitychange", () => {
   try {
     if (document.visibilityState == "hidden") {
       Notification.requestPermission().then((permission) => {
@@ -69,7 +69,6 @@ document.addEventListener("visibilitychange", (e) => {
           });
         }
       });
-      console.log("Hidden");
     } else {
       if (currentUser) {
         updateDoc(doc(db, "users", `${currentUser.id}`), {
@@ -77,7 +76,6 @@ document.addEventListener("visibilitychange", (e) => {
         }).then(() => console.log("become online"));
       }
       notify ? notify.close() : null;
-      console.log("open");
     }
   } catch (error) {
     console.log(error);
@@ -578,7 +576,6 @@ async function renderUserChats() {
               console.log("Played");
             })
             .catch((error) => {
-              new swal("Audio failed to play", "", "warning");
               console.log("Audio failed to play");
             });
         }
@@ -590,7 +587,7 @@ async function renderUserChats() {
       users.sort((a, b) => b.lastMessage.id - a.lastMessage.id);
       sessionStorage.setItem("chatUsers", JSON.stringify(users));
 
-      unsnapUserStatus();
+      unsnapUserStatus ? unsnapUserStatus() : null;
       detectUserStatus(users);
     });
   } catch (error) {
