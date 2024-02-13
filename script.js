@@ -31,7 +31,9 @@ const db = getFirestore(app);
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-window.onbeforeunload = function (event) {
+window.onbeforeunload = function (e) {
+  // e.preventDefault();
+
   if (currentUser) {
     updateDoc(doc(db, "users", `${currentUser.id}`), {
       online: false,
@@ -49,6 +51,39 @@ window.onload = (e) => {
   }
 };
 
+let notify;
+document.addEventListener("visibilitychange", (e) => {
+  try {
+    if (document.visibilityState == "hidden") {
+      Notification.requestPermission().then((permission) => {
+        if (currentUser) {
+          updateDoc(doc(db, "users", `${currentUser.id}`), {
+            online: false,
+          }).then(() => console.log("become offline"));
+        }
+
+        if (permission == "granted") {
+          notify = new Notification("Please come back", {
+            icon: "./icon.png",
+            body: "Friends wait you",
+          });
+        }
+      });
+      console.log("Hidden");
+    } else {
+      if (currentUser) {
+        updateDoc(doc(db, "users", `${currentUser.id}`), {
+          online: true,
+        }).then(() => console.log("become online"));
+      }
+      notify ? notify.close() : null;
+      console.log("open");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 let loader = document.querySelector(".loader");
 let homePage = document.querySelector(".home");
 let loginPage = document.querySelector(".loginForm");
@@ -61,13 +96,13 @@ let searchInput = document.getElementById("searchUser");
 let chatID = "";
 let unsubscribeChat;
 let usersStatusList = [];
-let unsnapUserStatus = () => {},
-  unsnapUserChats = () => {};
+let unsnapUserStatus, unsnapUserChats;
 
 detectUserStatus();
 
 if (currentUser) {
   activeScreen(chatsPage);
+  unsnapUserChats ? unsnapUserChats() : null;
   renderUserChats();
   // handleHomePage();
 }
@@ -96,16 +131,18 @@ searchInput.oninput = (e) => {
     .querySelector(".search-result")
     .style.setProperty("display", "none", "important");
 };
-document.querySelector(".logout").onclick = async (e) => {
-  await updateDoc(doc(db, "users", `${currentUser.id}`), {
+document.querySelector(".logout").onclick = (e) => {
+  loader.classList.remove("hide");
+  updateDoc(doc(db, "users", `${currentUser.id}`), {
     online: false,
-  }).then((x) => console.log("fullFilled", x));
-
-  localStorage.removeItem("currentUser");
-  sessionStorage.removeItem("chatUsers");
-  loginPage.reset();
-  registerPage.reset();
-  activeScreen(loginPage);
+  }).then(() => {
+    loader.classList.add("hide");
+    localStorage.removeItem("currentUser");
+    sessionStorage.removeItem("chatUsers");
+    loginPage.reset();
+    registerPage.reset();
+    activeScreen(loginPage);
+  });
 };
 
 // //* Handle Click On user
@@ -479,9 +516,20 @@ function addUserChatsToPage(users) {
       let { photoURL, name, id } = user?.userInfo;
       let { online } = usersStatusList.find((el) => el.id == id) || false;
 
-      if (!seen && !chatsPage.classList.contains("hide")) {
-        document.querySelector("#notification").play();
-      }
+      // if (!seen && !chatsPage.classList.contains("hide")) {
+      //   // document.querySelector("#notification").play();
+      //   var promise = document.querySelector("#notification").play();
+
+      //   if (promise !== undefined) {
+      //     promise
+      //       .then((_) => {
+      //         console.log("Played");
+      //       })
+      //       .catch((error) => {
+      //         new swal("Audio failed to play", "", "warning");
+      //       });
+      //   }
+      // }
 
       usersContainer.innerHTML += `
             <div class="user  ${
@@ -516,10 +564,24 @@ async function renderUserChats() {
   try {
     let count = 0;
     unsnapUserChats = onSnapshot(doc(db, "userChats", `${user.id}`), (doc) => {
-      usersContainer.innerHTML = "";
-
       if (!doc.exists()) {
         return;
+      }
+
+      if (!chatsPage.classList.contains("hide")) {
+        // document.querySelector("#notification").play();
+        var promise = document.querySelector("#notification").play();
+
+        if (promise !== undefined) {
+          promise
+            .then((_) => {
+              console.log("Played");
+            })
+            .catch((error) => {
+              new swal("Audio failed to play", "", "warning");
+              console.log("Audio failed to play");
+            });
+        }
       }
 
       let usersDoc = doc.data();

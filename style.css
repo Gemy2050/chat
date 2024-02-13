@@ -119,6 +119,10 @@ body {
   background-color: green;
 }
 
+.container .chats .user[online="notActive"] .image::before {
+  background-color: #034ea3;
+}
+
 .container .chats :is(.users, .search-result) .user:hover {
   background-color: #DDD;
 }
@@ -126,8 +130,8 @@ body {
 .container .chats .user.not-seen::before {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background-color: #0075ff;
   right: 5px;
