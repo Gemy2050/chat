@@ -143,7 +143,6 @@ document.querySelector(".loginForm .route span").onclick = () => {
 };
 
 searchInput.oninput = (e) => {
-  document.querySelector(".search-result").innerHTML = "";
   document
     .querySelector(".search-box")
     .style.setProperty("display", "none", "important");
@@ -151,6 +150,11 @@ searchInput.oninput = (e) => {
 document.querySelector(".logout").onclick = (e) => {
   loader.classList.remove("hide");
   document.querySelector(".chats .users").innerHTML = "";
+  document
+    .querySelector(".search-box")
+    .style.setProperty("display", "none", "important");
+  document.querySelector(".search-message").innerHTML = "";
+  document.querySelector("#searchUser").value = "";
 
   if (!currentUser) {
     localStorage.clear();
@@ -418,12 +422,8 @@ async function chat() {
 }
 
 async function search(e) {
-  if (
-    ["", " ", null, currentUser.name].includes(
-      searchInput.value.trim().toLowerCase()
-    )
-  )
-    return;
+  if (["", " ", null].includes(searchInput.value.trim().toLowerCase())) return;
+  document.querySelector(".search-result").innerHTML = "";
 
   e.target.classList.add("disabled");
   try {
@@ -431,7 +431,11 @@ async function search(e) {
 
     const q = query(collection(db, "users"), where("name", "==", searchValue));
     const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs;
+    const data = querySnapshot.docs.filter((el) => el.id != currentUser.id);
+
+    if (data.length == 0) {
+      throw new Error("User Not Found");
+    }
 
     data.forEach((el) => {
       let user = el.data();
@@ -451,6 +455,10 @@ async function search(e) {
       </div>
       `;
     });
+
+    document.querySelector(
+      ".search-box .search-message"
+    ).innerHTML = `Search Result:`;
 
     e.target.classList.remove("disabled");
   } catch (error) {
