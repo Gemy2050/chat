@@ -27,7 +27,7 @@ body {
 
 .container {
   position: relative;
-  width: 450px;
+  /*width: 450px;*/
   max-width: 100%;
   background-color: #f1f5f9;
   background-color: #e1e1e1;
