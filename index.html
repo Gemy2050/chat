@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0075ff">
   <title>Chat App</title>
   <link rel="stylesheet" href="./cdn/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
@@ -16,7 +17,7 @@
 
 <body>
 
-  <div class="loader hide">
+  <div class="loader">
     <div class="justify-content-center jimu-primary-loading"></div>
   </div>
 
@@ -87,18 +88,20 @@
           placeholder="Search user" />
         <button class="btn btn-sm btn-primary" aria-label="search">search</button>
       </div>
-      <div class="search-result d-none pt-1 pb-3 px-3 border-bottom ">
-        <!-- <p class="search-message text-muted">Search Result</p>
-        <div class="user d-flex align-items-center gap-2">
-          <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
-          <div class="info flex-grow-1">
-            <div class="top w-100 d-flex gap-2 justify-content-between">
-              <h5 class="name m-0">Mohamed Omar</h5>
-              <span class="time text-muted">7:05 pm</span>
+      <div class="search-box d-none pt-1 pb-3 px-3 border-bottom ">
+        <p class="search-message text-muted">Search Result</p>
+        <div class="search-result ">
+          <div class="user d-flex align-items-center gap-2">
+            <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
+            <div class="info flex-grow-1">
+              <div class="top w-100 d-flex gap-2 justify-content-between">
+                <h5 class="name m-0">Mohamed Omar</h5>
+                <span class="time text-muted">7:05 pm</span>
+              </div>
+              <p class="message m-0 text-muted"> This is a Message</p>
             </div>
-            <p class="message m-0 text-muted"> This is a Message</p>
           </div>
-        </div> -->
+        </div>
       </div>
 
       <div class="users">
@@ -107,7 +110,9 @@
     <div class="user-chat hide">
       <div class="head bg-dark sticky-top p-3 user-select-none">
         <div class="user-info d-flex align-items-center gap-2">
-          <img src="" alt="avatar">
+          <div class="image position-relative">
+            <img src="" alt="avatar">
+          </div>
           <h5 class="username text-white m-0"></h5>
         </div>
         <button class="btn btn-sm btn-danger back" aria-label="back"><i
@@ -129,10 +134,10 @@
   <audio src="./sound/chat-sound.mp3" hidden preload="auto" id="chatSound"></audio>
 </body>
 
-<script src="./cdn/sweetalert2@11.net_npm_sweetalert2@11"></script>
-<script src="./cdn/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-storage.js"></script>
-<script src="script.js" type="module"></script>
+<script src="./cdn/sweetalert2@11.net_npm_sweetalert2@11"></script>
+<script src="./cdn/bootstrap.bundle.min.js"></script>
+<script src="./js/script.js" type="module"></script>
 
 </html>

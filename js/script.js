@@ -24,12 +24,11 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
+export const db = getFirestore(app);
 // * --------------------------------------------------------------
 // * --------------------------------------------------------------
-
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let loader = document.querySelector(".loader");
 
 window.onbeforeunload = function (e) {
   // e.preventDefault();
@@ -44,6 +43,27 @@ window.onbeforeunload = function (e) {
 };
 
 window.onload = (e) => {
+  loader.classList.add("hide");
+  currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (currentUser) {
+    activeScreen(chatsPage);
+    unsnapUserChats ? unsnapUserChats() : null;
+    renderUserChats();
+    // handleHomePage();
+  }
+
+  if (sessionStorage.getItem("otherUserId")) {
+    let userData = JSON.parse(sessionStorage.getItem("otherUser"));
+    document.querySelector(
+      ".user-chat .head .username"
+    ).innerHTML = `${userData.name}`;
+    document.querySelector(".user-chat .head img").src = userData.photoURL;
+
+    chat();
+    activeScreen(userChatPage);
+  }
+
   if (currentUser) {
     updateDoc(doc(db, "users", `${currentUser.id}`), {
       online: true,
@@ -54,7 +74,7 @@ window.onload = (e) => {
 let notify;
 document.addEventListener("visibilitychange", () => {
   try {
-    if (document.visibilityState == "hidden") {
+    if (document.visibilityState == "hidden" && currentUser) {
       Notification.requestPermission().then((permission) => {
         if (currentUser) {
           updateDoc(doc(db, "users", `${currentUser.id}`), {
@@ -82,7 +102,6 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-let loader = document.querySelector(".loader");
 let homePage = document.querySelector(".home");
 let loginPage = document.querySelector(".loginForm");
 let registerPage = document.querySelector(".registerForm");
@@ -98,23 +117,23 @@ let unsnapUserStatus, unsnapUserChats;
 
 detectUserStatus();
 
-if (currentUser) {
-  activeScreen(chatsPage);
-  unsnapUserChats ? unsnapUserChats() : null;
-  renderUserChats();
-  // handleHomePage();
-}
+// if (currentUser) {
+//   activeScreen(chatsPage);
+//   unsnapUserChats ? unsnapUserChats() : null;
+//   renderUserChats();
+//   // handleHomePage();
+// }
 
-if (sessionStorage.getItem("otherUserId")) {
-  let userData = JSON.parse(sessionStorage.getItem("otherUser"));
-  document.querySelector(
-    ".user-chat .head .username"
-  ).innerHTML = `${userData.name}`;
-  document.querySelector(".user-chat .head img").src = userData.photoURL;
+// if (sessionStorage.getItem("otherUserId")) {
+//   let userData = JSON.parse(sessionStorage.getItem("otherUser"));
+//   document.querySelector(
+//     ".user-chat .head .username"
+//   ).innerHTML = `${userData.name}`;
+//   document.querySelector(".user-chat .head img").src = userData.photoURL;
 
-  chat();
-  activeScreen(userChatPage);
-}
+//   chat();
+//   activeScreen(userChatPage);
+// }
 
 document.querySelector(".registerForm .route span").onclick = () => {
   activeScreen(loginPage);
@@ -126,11 +145,18 @@ document.querySelector(".loginForm .route span").onclick = () => {
 searchInput.oninput = (e) => {
   document.querySelector(".search-result").innerHTML = "";
   document
-    .querySelector(".search-result")
+    .querySelector(".search-box")
     .style.setProperty("display", "none", "important");
 };
 document.querySelector(".logout").onclick = (e) => {
   loader.classList.remove("hide");
+  document.querySelector(".chats .users").innerHTML = "";
+
+  if (!currentUser) {
+    localStorage.clear();
+    window.location.reload();
+  }
+
   updateDoc(doc(db, "users", `${currentUser.id}`), {
     online: false,
   }).then(() => {
@@ -150,7 +176,7 @@ document.addEventListener("click", async (e) => {
     sessionStorage.setItem("otherUserId", chatID);
     activeScreen(userChatPage);
     document
-      .querySelector(".search-result")
+      .querySelector(".search-box")
       .style.setProperty("display", "none", "important");
     searchInput.value = "";
 
@@ -225,10 +251,7 @@ async function sendMessage() {
   }
 
   let time =
-    `${hours}:`.padStart(3, "0") +
-    `${dateNow.getMinutes()}`.padStart(2, "0") +
-    " " +
-    period;
+    `${hours}:` + `${dateNow.getMinutes()}`.padStart(2, "0") + " " + period;
 
   try {
     // Check if there is a chat between the two users
@@ -327,6 +350,7 @@ async function sendMessage() {
       .scrollIntoView({ behavior: "smooth" });
   } catch (error) {
     new swal("Server Error", "", "error");
+    console.log(error);
   }
 }
 async function chat() {
@@ -368,7 +392,7 @@ async function chat() {
             message.senderId == currentUserId ? "outgoing" : "incoming"
           }">
             <div class="info">
-              <img src="${message.photoURL}" alt="" loading="lazy">
+              <img src="${message.photoURL}" alt="avatar" loading="lazy">
               <span class="time d-block text-muted">${message.time}</span>
             </div>
             <p class="m-0 content">${message.message}</p>
@@ -409,34 +433,35 @@ async function search(e) {
     const querySnapshot = await getDocs(q);
     const data = querySnapshot.docs;
 
-    let user = data[0]?.data();
+    data.forEach((el) => {
+      let user = el.data();
 
-    let { online } = usersStatusList.find((el) => el.id == user.id) || false;
+      let { online } = usersStatusList.find((el) => el.id == user.id) || false;
 
-    document.querySelector(".search-result").innerHTML = `
-      <p class="search-message text-muted">search result:</p>
-        <div class="user d-flex align-items-center gap-2 text-capitalize" online="${online}" data-id='${user.id}'>
-          <div class="image">
-            <img src="${user.photoURL}" alt="avatar">
-          </div>
-          <div class="info flex-grow-1">
-            <div class="top w-100 d-flex gap-2 justify-content-between">
-              <h6 class="name m-0">${user.name}</h6>
-            </div>
+      document.querySelector(".search-result").innerHTML += `
+      <div class="user d-flex align-items-center gap-2 text-capitalize" online="${online}" data-id='${user.id}'>
+        <div class="image">
+          <img src="${user.photoURL}" alt="avatar">
+        </div>
+        <div class="info flex-grow-1">
+          <div class="top w-100 d-flex gap-2 justify-content-between">
+          <h6 class="name m-0">${user.name}</h6>
           </div>
         </div>
-    `;
+      </div>
+      `;
+    });
 
     e.target.classList.remove("disabled");
   } catch (error) {
-    new swal(error.message, "", "error");
+    console.log(error);
     document.querySelector(
-      ".search-result"
-    ).innerHTML = `<p class="search-message text-muted">Not Found</p>`;
+      ".search-box .search-message"
+    ).innerHTML = `Not Found`;
     e.target.classList.remove("disabled");
   }
   document
-    .querySelector(".search-result")
+    .querySelector(".search-box")
     .style.setProperty("display", "block", "important");
 }
 
@@ -498,6 +523,7 @@ function handleHomePage() {
   } catch (error) {
     console.log(error);
     new swal(error.message, "", "error");
+    console.log(error);
   }
 }
 
@@ -513,21 +539,6 @@ function addUserChatsToPage(users) {
       let { message, time, seen } = user?.lastMessage;
       let { photoURL, name, id } = user?.userInfo;
       let { online } = usersStatusList.find((el) => el.id == id) || false;
-
-      // if (!seen && !chatsPage.classList.contains("hide")) {
-      //   // document.querySelector("#notification").play();
-      //   var promise = document.querySelector("#notification").play();
-
-      //   if (promise !== undefined) {
-      //     promise
-      //       .then((_) => {
-      //         console.log("Played");
-      //       })
-      //       .catch((error) => {
-      //         new swal("Audio failed to play", "", "warning");
-      //       });
-      //   }
-      // }
 
       usersContainer.innerHTML += `
             <div class="user  ${
@@ -566,13 +577,13 @@ async function renderUserChats() {
         return;
       }
 
-      if (!chatsPage.classList.contains("hide")) {
+      if (!chatsPage.classList.contains("hide") && ++count > 1) {
         // document.querySelector("#notification").play();
         var promise = document.querySelector("#notification").play();
 
         if (promise !== undefined) {
           promise
-            .then((_) => {
+            .then(() => {
               console.log("Played");
             })
             .catch((error) => {
@@ -592,6 +603,7 @@ async function renderUserChats() {
     });
   } catch (error) {
     new swal(error.message, "", "error");
+    console.log(error);
   }
 }
 async function detectUserStatus(users) {
@@ -601,7 +613,7 @@ async function detectUserStatus(users) {
       return;
     }
 
-    let chatUsersId = chatUsers.map((el) => el.userInfo.id);
+    let chatUsersId = chatUsers.map((el) => el?.userInfo?.id);
 
     const q = query(collection(db, "users"), where("id", "in", chatUsersId));
     unsnapUserStatus = onSnapshot(q, (snapshot) => {
@@ -626,6 +638,7 @@ async function detectUserStatus(users) {
     });
   } catch (error) {
     new swal(error.message, "", "error");
+    console.log(error);
   }
 }
 
@@ -670,7 +683,7 @@ async function register(e) {
     const data = querySnapshot.docs;
 
     if (data[0]) {
-      new swal("User already exists!", "", "warning");
+      new swal("Email already exists!", "", "warning");
       return;
     }
 
@@ -682,7 +695,6 @@ async function register(e) {
     new swal("Server Error", "", "error");
   }
   e.target.classList.remove("disabled");
-  loader.classList.add("hide");
 }
 
 async function uploadData(fullName, email, password) {
@@ -716,11 +728,11 @@ async function uploadData(fullName, email, password) {
             photoURL: downloadURL,
             email: email,
             password: password,
-            online: true,
+            online: false,
           };
 
           setDoc(doc(db, "users", `${userID}`), currentUser);
-
+          loader.classList.add("hide");
           new swal("Account Created Successfully!", "", "success");
           document.querySelector(".register").classList.remove("disabled");
           activeScreen(loginPage);
@@ -731,6 +743,7 @@ async function uploadData(fullName, email, password) {
     );
   } catch (error) {
     new swal(error.message, "", "error");
+    console.log(error);
   }
 }
 

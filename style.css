@@ -6,6 +6,10 @@
 
 body {
   font-family: System-ui;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 ::-webkit-scrollbar {
@@ -28,11 +32,10 @@ body {
   background-color: #f1f5f9;
   background-color: #e1e1e1;
   background-color: #F2F2F2;
-  margin: 10px auto;
   border-radius: 6px;
-  height: calc(100vh - 20px);
+  height: calc(100vh);
+  max-height: 610px;
   padding: 0px;
-  /* overflow-y: scroll; */
 }
 
 .container>div {
