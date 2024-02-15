@@ -22,7 +22,7 @@ const firebaseConfig = {
   appId: "1:427355085094:web:82916109a1ae5f5518c9e7",
 };
 
-firebase.initializeApp(firebaseConfig);
+// firebase.initializeApp(firebaseConfig);
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 // * --------------------------------------------------------------
@@ -49,8 +49,8 @@ window.onload = (e) => {
   if (currentUser) {
     activeScreen(chatsPage);
     unsnapUserChats ? unsnapUserChats() : null;
+    // detectUserStatus();
     renderUserChats();
-    // handleHomePage();
   }
 
   if (sessionStorage.getItem("otherUserId")) {
@@ -114,8 +114,6 @@ let chatID = "";
 let unsubscribeChat;
 let usersStatusList = [];
 let unsnapUserStatus, unsnapUserChats;
-
-detectUserStatus();
 
 // if (currentUser) {
 //   activeScreen(chatsPage);
@@ -262,7 +260,10 @@ async function sendMessage() {
 
     //* let ChatsDoc = await getDoc(doc(db, "chats", combinedId));
     let chatUsers = JSON.parse(sessionStorage.getItem("chatUsers")) || [];
-    let user = chatUsers.find((el) => el.userInfo.id == otherUser.id);
+    let user = chatUsers.find((el) => {
+      // console.log(el.userInfo.id == otherUser.id);
+      return el.userInfo.id == otherUser.id;
+    });
 
     //* if(!ChatsDoc.exists())
     if (!user) {
@@ -390,8 +391,37 @@ async function chat() {
 
         messagesContainer.innerHTML = "";
 
+        let date;
+        let dateElement;
+
         docData.data().messages.forEach((message) => {
+          let options = { day: "2-digit", month: "2-digit", year: "numeric" };
+          let msgDate = new Date(message.id).toLocaleDateString(
+            ["en-GB"],
+            options
+          );
+          let today = new Date();
+          let yesterday = new Date(new Date().setDate(today.getDate() - 1));
+
+          if (date != msgDate) {
+            if (today.toLocaleDateString(["en-GB"], options) == msgDate) {
+              date = "Today";
+            } else if (
+              yesterday.toLocaleDateString(["en-GB"], options) == msgDate
+            ) {
+              date = "Yesterday";
+            } else {
+              date = msgDate;
+            }
+
+            dateElement = `<h6 class='date'>${date}</h6>`;
+            date = msgDate;
+          } else {
+            dateElement = "";
+          }
+
           messagesContainer.innerHTML += `
+          ${dateElement}
           <div class="message ${
             message.senderId == currentUserId ? "outgoing" : "incoming"
           }">
@@ -543,10 +573,28 @@ function addUserChatsToPage(users) {
   try {
     let usersContainer = document.querySelector(".chats .users");
     usersContainer.innerHTML = "";
+
     for (let user of users) {
-      let { message, time, seen } = user?.lastMessage;
+      if (!user.lastMessage || !user.userInfo) {
+        continue;
+      }
+
+      let { message, time, seen, id: msgID } = user?.lastMessage;
       let { photoURL, name, id } = user?.userInfo;
       let { online } = usersStatusList.find((el) => el.id == id) || false;
+
+      let options = { day: "2-digit", month: "2-digit", year: "numeric" };
+      let msgDate = new Date(msgID).toLocaleDateString(["en-GB"], options);
+      let today = new Date();
+      let yesterday = new Date(new Date().setDate(today.getDate() - 1));
+
+      if (today.toLocaleDateString(["en-GB"], options) == msgDate) {
+        time = time;
+      } else if (yesterday.toLocaleDateString(["en-GB"], options) == msgDate) {
+        time = "Yesterday";
+      } else {
+        time = msgDate;
+      }
 
       usersContainer.innerHTML += `
             <div class="user  ${
@@ -621,7 +669,9 @@ async function detectUserStatus(users) {
       return;
     }
 
-    let chatUsersId = chatUsers.map((el) => el?.userInfo?.id);
+    let chatUsersId = chatUsers
+      .map((el) => el?.userInfo?.id)
+      .filter((el) => el != undefined);
 
     const q = query(collection(db, "users"), where("id", "in", chatUsersId));
     unsnapUserStatus = onSnapshot(q, (snapshot) => {
@@ -691,6 +741,8 @@ async function register(e) {
     const data = querySnapshot.docs;
 
     if (data[0]) {
+      e.target.classList.remove("disabled");
+      loader.classList.add("hide");
       new swal("Email already exists!", "", "warning");
       return;
     }
@@ -702,6 +754,7 @@ async function register(e) {
     console.log("Error creating user: ", error.message);
     new swal("Server Error", "", "error");
   }
+  loader.classList.add("hide");
   e.target.classList.remove("disabled");
 }
 
