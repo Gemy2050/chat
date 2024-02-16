@@ -21,109 +21,111 @@
     <div class="justify-content-center jimu-primary-loading"></div>
   </div>
 
-  <div class="container d-flex justify-content-center ">
-    <div class="home ">
-      <!-- Register Form -->
-      <form id="registerForm" class="registerForm hide row g-3">
-        <h3 class="text-primary">Welcome to the Chat App!</h3>
-        <p class="text-muted my-1">Please log in or register below:</p>
-        <div class="col-6">
-          <label for="firstName" class="form-label">FirstName</label>
-          <input type="text" class="form-control" id="firstName" required>
-        </div>
-        <div class="col-6">
-          <label for="lastName" class="form-label">LastName</label>
-          <input type="text" class="form-control" id="lastName" required>
-        </div>
-        <div class="col-12">
-          <label for="email-register" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email-register" required>
-        </div>
-        <div class="col-md-12 position-relative">
-          <label for="password-register" class="form-label">Password</label>
-          <input type="password" class="form-control pass ps-3 pe-4" maxlength="16" id="password-register" required>
-          <i class="fas fa-eye eye"></i>
-        </div>
-        <div class="col-md-12">
-          <label for="image" class="form-label">Profile Image</label>
-          <input type="file" accept="image/*" class="form-control" id="image" required>
-        </div>
+  <div class="app">
+    <div class="container position-relative d-flex justify-content-center ">
+      <div class="home ">
+        <!-- Register Form -->
+        <form id="registerForm" class="registerForm hide row g-3">
+          <h3 class="text-primary">Welcome to the Chat App!</h3>
+          <p class="text-muted my-1">Please log in or register below:</p>
+          <div class="col-6">
+            <label for="firstName" class="form-label">FirstName</label>
+            <input type="text" class="form-control" id="firstName" required>
+          </div>
+          <div class="col-6">
+            <label for="lastName" class="form-label">LastName</label>
+            <input type="text" class="form-control" id="lastName" required>
+          </div>
+          <div class="col-12">
+            <label for="email-register" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email-register" required>
+          </div>
+          <div class="col-md-12 position-relative">
+            <label for="password-register" class="form-label">Password</label>
+            <input type="password" class="form-control pass ps-3 pe-4" maxlength="16" id="password-register" required>
+            <i class="fas fa-eye eye"></i>
+          </div>
+          <div class="col-md-12">
+            <label for="image" class="form-label">Profile Image</label>
+            <input type="file" accept="image/*" class="form-control" id="image" required>
+          </div>
 
-        <div class="col-12 text-center mt-5">
-          <button type="submit" class="register btn btn-primary w-50">Create Account</button>
-          <p class="mt-3 text-muted route">Have an account? <span class="link-primary">Login</span></p>
-        </div>
-      </form>
-      <!-- Login Form -->
-      <form id="loginForm" class=" loginForm  row g-3">
-        <h3 class="text-primary">Welcome to the Chat App!</h3>
-        <p class="text-muted my-1">Please log in or register below:</p>
-        <div class="col-12">
-          <label for="email-login" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email-login" required>
-        </div>
-        <div class="col-md-12 position-relative">
-          <label for="password-login" class="form-label">Password</label>
-          <input type="password" class="form-control pass ps-3 pe-4" id="password-login" maxlength="16" required>
-          <i class="fas fa-eye eye"></i>
-        </div>
+          <div class="col-12 text-center mt-5">
+            <button type="submit" class="register btn btn-primary w-50">Create Account</button>
+            <p class="mt-3 text-muted route">Have an account? <span class="link-primary">Login</span></p>
+          </div>
+        </form>
+        <!-- Login Form -->
+        <form id="loginForm" class=" loginForm  row g-3">
+          <h3 class="text-primary">Welcome to the Chat App!</h3>
+          <p class="text-muted my-1">Please log in or register below:</p>
+          <div class="col-12">
+            <label for="email-login" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email-login" required>
+          </div>
+          <div class="col-md-12 position-relative">
+            <label for="password-login" class="form-label">Password</label>
+            <input type="password" class="form-control pass ps-3 pe-4" id="password-login" maxlength="16" required>
+            <i class="fas fa-eye eye"></i>
+          </div>
 
-        <div class="col-12 text-center mt-5">
-          <button type="submit" class="login btn btn-primary w-50" aria-label="login">Login</button>
-          <p class="mt-3 text-muted route">Create new account? <span class="link-primary">Register</span></p>
-        </div>
-      </form>
+          <div class="col-12 text-center mt-5">
+            <button type="submit" class="login btn btn-primary w-50" aria-label="login">Login</button>
+            <p class="mt-3 text-muted route">Create new account? <span class="link-primary">Register</span></p>
+          </div>
+        </form>
 
-    </div>
-    <div class="chats hide overflow-y-scroll">
-      <div class="head bg-dark sticky-top p-3 user-select-none">
-        <div class="user-info d-flex align-items-center gap-2">
-          <img src="" alt="avatar">
-          <h5 class="username m-0 text-white"></h5>
-        </div>
-        <button class="btn btn-sm btn-danger logout" aria-label="logout">Logout</button>
       </div>
-      <div class="search px-2 mt-1 mb-2 d-flex gap-1 w-100">
-        <input type="search" class="form-control" name="search" id="searchUser" autocomplete="off"
-          placeholder="Search user" />
-        <button class="btn btn-sm btn-primary" aria-label="search">search</button>
-      </div>
-      <div class="search-box d-none pt-1 pb-3 px-3 border-bottom ">
-        <p class="search-message text-muted">Search Result</p>
-        <div class="search-result ">
-          <div class="user d-flex align-items-center gap-2">
-            <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
-            <div class="info flex-grow-1">
-              <div class="top w-100 d-flex gap-2 justify-content-between">
-                <h5 class="name m-0">Mohamed Omar</h5>
-                <span class="time text-muted">7:05 pm</span>
+      <div class="chats hide overflow-y-scroll">
+        <div class="head bg-dark sticky-top p-3 user-select-none">
+          <div class="user-info d-flex align-items-center gap-2">
+            <img src="" alt="avatar">
+            <h5 class="username m-0 text-white"></h5>
+          </div>
+          <button class="btn btn-sm btn-danger logout" aria-label="logout">Logout</button>
+        </div>
+        <div class="search px-2 mt-1 mb-2 d-flex gap-1 w-100">
+          <input type="search" class="form-control" name="search" id="searchUser" autocomplete="off"
+            placeholder="Search user" />
+          <button class="btn btn-sm btn-primary" aria-label="search">search</button>
+        </div>
+        <div class="search-box d-none pt-1 pb-3 px-3 border-bottom ">
+          <p class="search-message text-muted">Search Result</p>
+          <div class="search-result ">
+            <div class="user d-flex align-items-center gap-2">
+              <img src="https://gemy2050.github.io/portfolio/imgs/icon.jpg" alt="avatar">
+              <div class="info flex-grow-1">
+                <div class="top w-100 d-flex gap-2 justify-content-between">
+                  <h5 class="name m-0">Mohamed Omar</h5>
+                  <span class="time text-muted">7:05 pm</span>
+                </div>
+                <p class="message m-0 text-muted"> This is a Message</p>
               </div>
-              <p class="message m-0 text-muted"> This is a Message</p>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="users">
-      </div>
-    </div>
-    <div class="user-chat hide position-relative">
-      <div class="head bg-dark sticky-top p-3 user-select-none">
-        <div class="user-info d-flex align-items-center gap-2">
-          <div class="image position-relative">
-            <img src="" alt="avatar">
-          </div>
-          <h5 class="username text-white m-0"></h5>
+        <div class="users">
         </div>
-        <button class="btn btn-sm btn-danger back" aria-label="back"><i
-            class="fa-solid fa-arrow-right-long"></i></button>
       </div>
-      <div class="messages">
-      </div>
-      <div class="input-group px-2 pb-1">
-        <!-- <input type="text" class="message-input form-control" placeholder="type a message" autofocus> -->
-        <textarea class="form-control message-input" placeholder="type a message" autofocus></textarea>
-        <button class="send btn btn-primary" aria-label="send">send</button>
+      <div class="user-chat hide position-relative">
+        <div class="head bg-dark sticky-top p-3 user-select-none">
+          <div class="user-info d-flex align-items-center gap-2">
+            <div class="image position-relative">
+              <img src="" alt="avatar">
+            </div>
+            <h5 class="username text-white m-0"></h5>
+          </div>
+          <button class="btn btn-sm btn-danger back" aria-label="back"><i
+              class="fa-solid fa-arrow-right-long"></i></button>
+        </div>
+        <div class="messages">
+        </div>
+        <div class="input-group px-2 pb-1">
+          <!-- <input type="text" class="message-input form-control" placeholder="type a message" autofocus> -->
+          <textarea class="form-control message-input" placeholder="type a message" autofocus></textarea>
+          <button class="send btn btn-primary" aria-label="send">send</button>
+        </div>
       </div>
     </div>
   </div>

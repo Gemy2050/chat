@@ -71,31 +71,20 @@ window.onload = (e) => {
   }
 };
 
-let notify;
 document.addEventListener("visibilitychange", () => {
   try {
     if (document.visibilityState == "hidden" && currentUser) {
-      Notification.requestPermission().then((permission) => {
-        if (currentUser) {
-          updateDoc(doc(db, "users", `${currentUser.id}`), {
-            online: false,
-          }).then(() => console.log("become offline"));
-        }
-
-        if (permission == "granted") {
-          notify = new Notification("Please come back", {
-            icon: "./icon.png",
-            body: "Friends wait you",
-          });
-        }
-      });
+      if (currentUser) {
+        updateDoc(doc(db, "users", `${currentUser.id}`), {
+          online: false,
+        }).then(() => console.log("become offline"));
+      }
     } else {
       if (currentUser) {
         updateDoc(doc(db, "users", `${currentUser.id}`), {
           online: true,
         }).then(() => console.log("become online"));
       }
-      notify ? notify.close() : null;
     }
   } catch (error) {
     console.log(error);
@@ -160,6 +149,7 @@ document.addEventListener("click", async (e) => {
       .style.setProperty("display", "none", "important");
     searchInput.value = "";
 
+    count = 0;
     chat();
   } else if (e.target.classList.contains("back")) {
     try {
@@ -609,13 +599,14 @@ function addUserChatsToPage(users) {
     console.log(error);
   }
 }
+
+let count = 0;
 async function renderUserChats() {
   let usersContainer = document.querySelector(".chats .users");
   let user = JSON.parse(localStorage.getItem("currentUser"));
   document.querySelector(".chats .head img").src = user.photoURL;
   document.querySelector(".chats .head .username").textContent = user.name;
   try {
-    let count = 0;
     unsnapUserChats = onSnapshot(doc(db, "userChats", `${user.id}`), (doc) => {
       if (!doc.exists()) {
         return;
@@ -641,18 +632,15 @@ async function renderUserChats() {
       let chatUsers = JSON.parse(sessionStorage.getItem("chatUsers"));
       const otherUserId = sessionStorage.getItem("otherUserId");
 
-      // console.log(chatUsers, otherUserId);
+      if (chatUsers && otherUserId) {
+        let user = users.find((user) => user.userInfo.id == otherUserId);
+        let u = chatUsers.find((user) => user.userInfo.id == otherUserId);
 
-      // if (chatUsers && otherUserId) {
-      //   console.log("Yes");
-      //   let user = users.find((user) => user.userInfo.id == otherUserId);
-      //   let u = chatUsers.find((user) => user.userInfo.id == otherUserId);
-
-      //   if (user.lastMessage.message == u.lastMessage.message) {
-      //     console.log("Not This User");
-      //     document.querySelector("#notification").play();
-      //   }
-      // }
+        if (user.lastMessage.message == u.lastMessage.message && ++count > 1) {
+          document.querySelector("#notification").play();
+        } else {
+        }
+      }
 
       users.sort((a, b) => b.lastMessage.id - a.lastMessage.id);
       sessionStorage.setItem("chatUsers", JSON.stringify(users));
