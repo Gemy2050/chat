@@ -24,15 +24,15 @@
   <div class="container d-flex justify-content-center ">
     <div class="home ">
       <!-- Register Form -->
-      <form id="registerForm" class="registerForm row g-3">
+      <form id="registerForm" class="registerForm hide row g-3">
         <h3 class="text-primary">Welcome to the Chat App!</h3>
         <p class="text-muted my-1">Please log in or register below:</p>
         <div class="col-6">
-          <label for="firstName class=" form-label">FirstName</label>
+          <label for="firstName" class="form-label">FirstName</label>
           <input type="text" class="form-control" id="firstName" required>
         </div>
         <div class="col-6">
-          <label for="lastName class=" form-label">LastName</label>
+          <label for="lastName" class="form-label">LastName</label>
           <input type="text" class="form-control" id="lastName" required>
         </div>
         <div class="col-12">
@@ -51,11 +51,11 @@
 
         <div class="col-12 text-center mt-5">
           <button type="submit" class="register btn btn-primary w-50">Create Account</button>
-          <p class="mt-2 text-muted route">Have an account? <span class="link-primary">Login</span></p>
+          <p class="mt-3 text-muted route">Have an account? <span class="link-primary">Login</span></p>
         </div>
       </form>
       <!-- Login Form -->
-      <form id="loginForm hide" class=" loginForm hide row g-3">
+      <form id="loginForm" class=" loginForm  row g-3">
         <h3 class="text-primary">Welcome to the Chat App!</h3>
         <p class="text-muted my-1">Please log in or register below:</p>
         <div class="col-12">
@@ -70,7 +70,7 @@
 
         <div class="col-12 text-center mt-5">
           <button type="submit" class="login btn btn-primary w-50" aria-label="login">Login</button>
-          <p class="mt-2 text-muted route">Create new account? <span class="link-primary">Register</span></p>
+          <p class="mt-3 text-muted route">Create new account? <span class="link-primary">Register</span></p>
         </div>
       </form>
 
@@ -108,7 +108,7 @@
       </div>
     </div>
     <div class="user-chat hide position-relative">
-      <div class="head bg-dark p-3 user-select-none">
+      <div class="head bg-dark sticky-top p-3 user-select-none">
         <div class="user-info d-flex align-items-center gap-2">
           <div class="image position-relative">
             <img src="" alt="avatar">
@@ -120,7 +120,7 @@
       </div>
       <div class="messages">
       </div>
-      <div class="input-group sticky-bottom px-2 pb-1">
+      <div class="input-group px-2 pb-1">
         <!-- <input type="text" class="message-input form-control" placeholder="type a message" autofocus> -->
         <textarea class="form-control message-input" placeholder="type a message" autofocus></textarea>
         <button class="send btn btn-primary" aria-label="send">send</button>

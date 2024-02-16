@@ -85,17 +85,6 @@ body {
   text-transform: capitalize;
 }
 
-.container .user-chat {
-  padding-top: 85px;
-}
-
-.container .user-chat .head {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-}
-
 .container :is(.chats, .user-chat) :is(input, textarea):focus {
   box-shadow: 0 0 0 !important;
 }
@@ -177,7 +166,7 @@ body {
 }
 
 .container .user-chat .messages {
-  height: calc(100% - 40px);
+  height: calc(100% - 120px);
   overflow-y: scroll;
   margin: auto;
   padding: 5px;

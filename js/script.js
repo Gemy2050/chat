@@ -115,24 +115,6 @@ let unsubscribeChat;
 let usersStatusList = [];
 let unsnapUserStatus, unsnapUserChats;
 
-// if (currentUser) {
-//   activeScreen(chatsPage);
-//   unsnapUserChats ? unsnapUserChats() : null;
-//   renderUserChats();
-//   // handleHomePage();
-// }
-
-// if (sessionStorage.getItem("otherUserId")) {
-//   let userData = JSON.parse(sessionStorage.getItem("otherUser"));
-//   document.querySelector(
-//     ".user-chat .head .username"
-//   ).innerHTML = `${userData.name}`;
-//   document.querySelector(".user-chat .head img").src = userData.photoURL;
-
-//   chat();
-//   activeScreen(userChatPage);
-// }
-
 document.querySelector(".registerForm .route span").onclick = () => {
   activeScreen(loginPage);
 };
@@ -146,6 +128,7 @@ searchInput.oninput = (e) => {
     .style.setProperty("display", "none", "important");
 };
 document.querySelector(".logout").onclick = (e) => {
+  let currentUser = JSON.parse(localStorage.getItem("currentUser"));
   loader.classList.remove("hide");
   document.querySelector(".chats .users").innerHTML = "";
   document
@@ -153,11 +136,6 @@ document.querySelector(".logout").onclick = (e) => {
     .style.setProperty("display", "none", "important");
   document.querySelector(".search-message").innerHTML = "";
   document.querySelector("#searchUser").value = "";
-
-  if (!currentUser) {
-    localStorage.clear();
-    window.location.reload();
-  }
 
   updateDoc(doc(db, "users", `${currentUser.id}`), {
     online: false,
@@ -186,7 +164,6 @@ document.addEventListener("click", async (e) => {
   } else if (e.target.classList.contains("back")) {
     try {
       unsubscribeChat();
-      activeScreen(chatsPage);
 
       let combinedId = sessionStorage.getItem("combinedId");
       let currentUserId = JSON.parse(localStorage.getItem("currentUser")).id;
@@ -198,6 +175,9 @@ document.addEventListener("click", async (e) => {
       await updateDoc(doc(db, "userChats", `${currentUserId}`), {
         [combinedId + ".lastMessage.seen"]: true,
       });
+
+      activeScreen(chatsPage);
+      document.querySelector(".message-input").value = "";
     } catch (error) {
       console.log("Error Message: ", error.message);
     }
@@ -382,6 +362,8 @@ async function chat() {
     ).innerHTML = `${userData.name}`;
     document.querySelector(".user-chat .head img").src = userData.photoURL;
 
+    let count = 0;
+
     unsubscribeChat = onSnapshot(
       doc(db, "chats", combinedId),
       async (docData) => {
@@ -393,8 +375,9 @@ async function chat() {
 
         let date;
         let dateElement;
+        let messages = docData.data().messages;
 
-        docData.data().messages.forEach((message) => {
+        messages.forEach((message) => {
           let options = { day: "2-digit", month: "2-digit", year: "numeric" };
           let msgDate = new Date(message.id).toLocaleDateString(
             ["en-GB"],
@@ -434,9 +417,15 @@ async function chat() {
         `;
         });
 
-        Array.from(document.querySelectorAll(".messages .message"))
-          .at(-1)
-          .scrollIntoView({ behavior: "smooth" });
+        let lastMessage = Array.from(
+          document.querySelectorAll(".messages .message")
+        ).at(-1);
+
+        lastMessage.scrollIntoView({ behavior: "smooth" });
+
+        if (messages.at(-1).senderId != currentUserId && ++count > 1) {
+          document.querySelector("#chatSound").play();
+        }
       }
     );
 
@@ -533,11 +522,10 @@ async function login(e) {
 
     if (passwordValue === user.password) {
       localStorage.setItem("currentUser", JSON.stringify(userData));
-      if (currentUser) {
-        updateDoc(doc(db, "users", `${currentUser.id}`), {
-          online: true,
-        });
-      }
+
+      updateDoc(doc(db, "users", `${userData.id}`), {
+        online: true,
+      });
 
       renderUserChats();
       activeScreen(chatsPage);
@@ -634,7 +622,6 @@ async function renderUserChats() {
       }
 
       if (!chatsPage.classList.contains("hide") && ++count > 1) {
-        // document.querySelector("#notification").play();
         var promise = document.querySelector("#notification").play();
 
         if (promise !== undefined) {
@@ -650,6 +637,22 @@ async function renderUserChats() {
 
       let usersDoc = doc.data();
       let users = Object.values(usersDoc);
+
+      let chatUsers = JSON.parse(sessionStorage.getItem("chatUsers"));
+      const otherUserId = sessionStorage.getItem("otherUserId");
+
+      // console.log(chatUsers, otherUserId);
+
+      // if (chatUsers && otherUserId) {
+      //   console.log("Yes");
+      //   let user = users.find((user) => user.userInfo.id == otherUserId);
+      //   let u = chatUsers.find((user) => user.userInfo.id == otherUserId);
+
+      //   if (user.lastMessage.message == u.lastMessage.message) {
+      //     console.log("Not This User");
+      //     document.querySelector("#notification").play();
+      //   }
+      // }
 
       users.sort((a, b) => b.lastMessage.id - a.lastMessage.id);
       sessionStorage.setItem("chatUsers", JSON.stringify(users));
